@@ -1,5 +1,7 @@
 # MVP (unreleased)
 
+- Joe Kojima: keep weather/location caches warm and defer family profile notes until Ember is quiet (source ee940fa9f7f29680fe012ab363122df1197b3a29). Background refresh requests and tests are documented in the toolkit README.
+
 - Integrate the tested language-adaptation instruction into the shared Ember
   persona: follow the person's language, switches and mixed-language speech,
   while keeping internal English messages in the conversation's language.
