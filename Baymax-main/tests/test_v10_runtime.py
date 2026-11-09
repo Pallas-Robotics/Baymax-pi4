@@ -1769,8 +1769,8 @@ class OpenPoseTests(unittest.TestCase):
         import os
 
         class CrashPose:
-            def __init__(self, model_path, hang=True):
-                if hang:
+            def __init__(self, model_path, force_mediapipe=False):
+                if not force_mediapipe:
                     os._exit(1)
                 self.device = "CPU"
 
@@ -1778,7 +1778,7 @@ class OpenPoseTests(unittest.TestCase):
                 return None
 
         class WorkingPose(CrashPose):
-            def __init__(self, model_path):
+            def __init__(self, model_path, force_mediapipe=False):
                 self.device = "CPU"
     ''')
 

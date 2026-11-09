@@ -923,20 +923,19 @@ class RecalledMemoryTests(unittest.TestCase):
         self.assertIsNone(ns["_recalled"])
 
     def test_the_lookup_waits_until_the_reply_has_played(self):
-        # A lookup (ONNX on the robot) still running when a reply starts holds back its first
-        # audio (u3, Orange Pi 5 Max); once the reply has played nothing is waiting on the cores.
-        ns = self.runtime(lambda query: [self.TOMATOES])
-        played_out = []
+        # Check event order directly; host clock resolution must not decide the result.
+        events = []
+        ns = self.runtime(lambda query: events.append("searched") or [self.TOMATOES])
 
         async def speaker_done():
             with ns["_playback_lock"]:
+                events.append("played")
                 ns["_playback_buffer"] = b""
-            played_out.append(time.monotonic())
         sent = self.converse(ns, [message(user="Ember, how is my garden doing?"), wait(0.1),
                                   message(ember="Your tomatoes", audio=self.PCM), wait(0.05), message(done=True),
                                   wait(0.05), speaker_done, wait(0.2)])
         self.assertEqual(len(self.searched), 1)
-        self.assertGreater(self.searched[0][0], played_out[0])   # was at the first words, before the reply
+        self.assertEqual(events, ["played", "searched"])
         self.assertEqual(len(sent), 1)
         self.assertIn("Joe grows tomatoes", sent[0]["turns"]["parts"][0]["text"])
 

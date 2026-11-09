@@ -148,7 +148,8 @@ def _open_pose(retry=False):
     from features.vision_process import Remote
     from features.pose.backend import ChildPose
     try:
-        return Remote(partial(ChildPose, _POSE_MODEL_PATH))
+        return Remote(partial(ChildPose, _POSE_MODEL_PATH,
+                              force_mediapipe=retry or _POSE_MODEL == "heavy"))
     except Exception as error:
         print(f"[CAM] Pose process could not start{' on the CPU' if retry else ''} ({error}).", flush=True)
         return None

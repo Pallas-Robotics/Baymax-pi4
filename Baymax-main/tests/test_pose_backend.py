@@ -81,6 +81,14 @@ class Opi4CpuBackendTests(unittest.TestCase):
         packages = [line for line in requirements.splitlines() if line and not line.startswith("#")]
         self.assertFalse(any("rknn" in package.lower() for package in packages))
 
+    def test_restart_can_force_mediapipe_even_with_an_explicit_onnx_setting(self):
+        cpu = Mock(device="CPU")
+        with patch.dict(os.environ, {backend.ENV_BACKEND: "onnx"}), \
+                patch.object(backend, "_open_onnx") as onnx:
+            child = backend.ChildPose("heavy.task", cpu_factory=lambda: cpu, force_mediapipe=True)
+        self.assertIs(child.backend, cpu)
+        onnx.assert_not_called()
+
     def test_legacy_scheduling_settings_cannot_change_opi4_cpu_or_gil(self):
         with patch.dict(os.environ, {"BAYMAX_CPU_PINNING": "on", "BAYMAX_GIL_SWITCH_MS": "1",
                                     "BAYMAX_FAST_CPUS": "4,5,6,7"}), \

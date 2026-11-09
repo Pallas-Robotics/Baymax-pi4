@@ -222,8 +222,11 @@ def create_pose_backend(mediapipe_options=None, model_path=None, env=None, log=_
 
 class ChildPose:
     """CPU pose in the vision child, with strictly increasing video timestamps."""
-    def __init__(self, model_path, cpu_factory=None):
-        self.backend = create_pose_backend(model_path=model_path, cpu_factory=cpu_factory)
+    def __init__(self, model_path, cpu_factory=None, force_mediapipe=False):
+        env = dict(os.environ)
+        if force_mediapipe:
+            env[ENV_BACKEND] = "cpu"
+        self.backend = create_pose_backend(model_path=model_path, env=env, cpu_factory=cpu_factory)
         self.timestamp = -1
 
     name = property(lambda self: self.backend.name)
