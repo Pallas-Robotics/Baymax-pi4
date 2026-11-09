@@ -1065,13 +1065,18 @@ class ReconnectTests(unittest.TestCase):
         self.assertEqual(self.pauses, [0.3, 0.6, 1.2, 2.4, 4.8])
 
     def test_a_model_that_finished_a_turn_is_kept_when_its_connection_ends(self):
+        import itertools
+        # The prior turn and the next connection must have distinct timestamps,
+        # independently of the host clock's resolution or scheduler.
+        ticks = itertools.count(1000, 0.001)
+        clock = SimpleNamespace(sleep=Mock(), monotonic=lambda: next(ticks))
         async def receive(index, session, ns):
             if index == 0:
-                ns["_turn_done_at"] = time.monotonic()  # as receive_audio does at turn_complete
+                ns["_turn_done_at"] = clock.monotonic()  # as receive_audio does at turn_complete
             if index < 2:
                 raise errors.APIError(1008, NOT_FOUND)
             raise ConnectionResetError()
-        self.run_models(3, receive)
+        self.run_models(3, receive, time=clock)
         # The close on a connection that worked reconnects with 2.5; it moves on once a
         # connection fails before any turn.
         self.assertEqual(self.models, [OLD, OLD, NEW])
