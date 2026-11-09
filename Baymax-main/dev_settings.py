@@ -7,9 +7,13 @@ import tempfile
 
 from dotenv import dotenv_values
 from features.toolkits.experimental import GROUPS
+from features.experimental import FEATURES
 
 MANAGED = {"BAYMAX_AUDIO_ENHANCEMENT", "BAYMAX_NOISE_SUPPRESSION_LEVEL", "GOOGLE_API_KEY", "EMBER_PUBLIC_TOOLKIT", "EMBER_PUBLIC_TOOL_GROUPS", "BAYMAX_MIC_DEVICE", "BAYMAX_SPEAKER_DEVICE", "BAYMAX_CAMERA_DEVICE",
            "BAYMAX_MIC_NAME", "BAYMAX_MIC_HOSTAPI", "BAYMAX_SPEAKER_NAME", "BAYMAX_SPEAKER_HOSTAPI", "BAYMAX_CAMERA_NAME", "BAYMAX_CAMERA_UID", "BAYMAX_FALL_DETECTION_ENABLED"}
+
+
+MANAGED.update(feature["setting"] for feature in FEATURES.values())
 
 
 def read_configuration(path):
@@ -24,6 +28,9 @@ def public_configuration(path):
             "public_toolkit": values.get("EMBER_PUBLIC_TOOLKIT", "0") == "1",
             "public_tool_groups": [g for g in values.get("EMBER_PUBLIC_TOOL_GROUPS", ",".join(GROUPS)).split(",") if g in GROUPS],
             "fall_detection": values.get("BAYMAX_FALL_DETECTION_ENABLED", "0") == "1",
+            "experimental_features": {name: {"enabled": values.get(feature["setting"], "0") == "1",
+                                              "stage": feature["stage"]}
+                                      for name, feature in FEATURES.items()},
             "microphone": values.get("BAYMAX_MIC_DEVICE", "") or "",
             "speaker": values.get("BAYMAX_SPEAKER_DEVICE", "") or "",
             "camera": values.get("BAYMAX_CAMERA_DEVICE", "") or "",
@@ -68,6 +75,15 @@ def save_configuration(path, payload, catalog):
     if fall_enabled and camera == "none":
         raise ValueError("Select a camera to enable fall detection.")
     values["BAYMAX_FALL_DETECTION_ENABLED"] = "1" if fall_enabled else "0"
+    experiments = payload.get("experimental_features", {})
+    if not isinstance(experiments, dict) or set(experiments) - FEATURES.keys() or any(
+            type(value) is not bool for value in experiments.values()):
+        raise ValueError("Choose experimental features using their checkboxes.")
+    for name, feature in FEATURES.items():
+        opted_in = experiments.get(name, old.get(feature["setting"], "0") == "1")
+        if name == "offline_fall_checkin" and opted_in and camera == "none":
+            raise ValueError("Select a camera to enable offline fall check-ins.")
+        values[feature["setting"]] = "1" if opted_in else "0"
     public_enabled = payload.get("public_toolkit", old.get("EMBER_PUBLIC_TOOLKIT", "0") == "1")
     groups = payload.get("public_tool_groups", old.get("EMBER_PUBLIC_TOOL_GROUPS", ",".join(GROUPS)).split(","))
     if not isinstance(public_enabled, bool):

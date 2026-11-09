@@ -79,6 +79,7 @@ SPEECH = lambda text, voice=None: np.full(live_eval.CHUNK, 500, dtype=np.int16)
 
 
 class ConfigTests(unittest.TestCase):
+    @patch.dict(os.environ, {"BAYMAX_LANGUAGE_ADAPTATION_ENABLED": "1"})
     def test_builds_the_mvp_config_from_the_runtime_source(self):
         with patch.dict(os.environ, {}, clear=False):
             for name in live_eval.launcher_defaults():

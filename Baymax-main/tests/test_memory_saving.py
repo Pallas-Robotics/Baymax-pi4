@@ -503,6 +503,12 @@ class TeardownTests(unittest.TestCase):
               "between_turns": forever,
               # The reconnect fix's per-session steps (tested in test_v10_runtime.ReconnectTests).
               "_send_cut_off_prompts": forever, "_abandon_reply": Mock(), "_abort_connection": Mock()}
+        ns["audio_queue_mic"] = asyncio.Queue()
+        ns["_offline_fall"] = None
+        ns.update(os=__import__("os"), sd=SimpleNamespace(PortAudioError=OSError),
+                  _local_fall_monitor=forever)
+        load_function("_RestartAudio", ns)
+        load_function("_run_gemini", ns)
         load_function("run", ns)
         self.addCleanup(setattr, live_models, "in_use", live_models.in_use)  # run() sets the model in use
         return ns
@@ -526,6 +532,22 @@ class TeardownTests(unittest.TestCase):
         self.assertTrue(ns["_shutdown_event"].is_set())  # no new uptime save starts
         self.assertGreaterEqual(ns["_stop_started_ts"], cancelled_at)
         self.assertLessEqual(ns["_stop_started_ts"], done_at)
+
+    def test_cancelling_only_the_network_task_does_not_stop_runtime_services(self):
+        ns = self.namespace()
+
+        async def cancel_session():
+            task = asyncio.create_task(ns["_run_gemini"]())
+            await asyncio.sleep(0.05)
+            task.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await task
+
+        with patch("builtins.print"):
+            asyncio.run(cancel_session())
+        self.assertFalse(ns["_shutdown_event"].is_set())
+        self.assertEqual(ns["_stop_started_ts"], 0.0)
+        ns["_abort_connection"].assert_called_once()
 
 
 class MemoryStoreTests(unittest.TestCase):

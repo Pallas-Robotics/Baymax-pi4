@@ -1243,7 +1243,7 @@
     },
     {
       "id": "docs_demo_devices_orange_pi_4_pro",
-      "label": "Orange Pi 4 Pro â€” Allwinner A733",
+      "label": "Orange Pi 4 Pro \u00e2\u20ac\u201d Allwinner A733",
       "file_type": "concept",
       "source_file": "docs/DEMO_DEVICES.md",
       "source_location": "board comparison",
@@ -1256,7 +1256,7 @@
     },
     {
       "id": "docs_demo_devices_orange_pi_5_max",
-      "label": "Orange Pi 5 Max â€” Rockchip RK3588",
+      "label": "Orange Pi 5 Max \u00e2\u20ac\u201d Rockchip RK3588",
       "file_type": "concept",
       "source_file": "docs/DEMO_DEVICES.md",
       "source_location": "board comparison",
@@ -1269,7 +1269,7 @@
     },
     {
       "id": "docs_features_feature_log_other_orange_pi_models",
-      "label": "Other Orange Pi models â€” unvalidated",
+      "label": "Other Orange Pi models \u00e2\u20ac\u201d unvalidated",
       "file_type": "concept",
       "source_file": "docs/features/FEATURE_LOG.md",
       "source_location": "Board support and evidence",
@@ -1574,7 +1574,7 @@
     },
     {
       "id": "docs_features_feature_log_arm_ci",
-      "label": "Linux ARM64 CI passed â€” not a physical board",
+      "label": "Linux ARM64 CI passed \u00e2\u20ac\u201d not a physical board",
       "file_type": "concept",
       "source_file": "docs/features/FEATURE_LOG.md",
       "source_location": "Board support and evidence / Verification",
@@ -1710,7 +1710,7 @@
     },
     {
       "id": "devops_opi4_flash_validation_historical_checks",
-      "label": "Historical builder/provisioning evidence â€” not V1 certification",
+      "label": "Historical builder/provisioning evidence \u00e2\u20ac\u201d not V1 certification",
       "file_type": "concept",
       "source_file": "devops/opi4-flash/VALIDATION.md",
       "source_location": "Passed",
@@ -1859,7 +1859,7 @@
     },
     {
       "id": "tests_readme_test_runner",
-      "label": "tests/run.py â€” repository suite entry point",
+      "label": "tests/run.py \u00e2\u20ac\u201d repository suite entry point",
       "file_type": "concept",
       "source_file": "tests/README.md",
       "source_location": "Repository tests",
@@ -1871,7 +1871,7 @@
     },
     {
       "id": "tests_readme_overall_checks",
-      "label": "tests/overall â€” syntax, ownership and UI checks",
+      "label": "tests/overall \u00e2\u20ac\u201d syntax, ownership and UI checks",
       "file_type": "concept",
       "source_file": "tests/README.md",
       "source_location": "tests tree",
@@ -1920,7 +1920,7 @@
     },
     {
       "id": "tests_readme_suite_ownership",
-      "label": "suite.json â€” exactly one owner per application test module",
+      "label": "suite.json \u00e2\u20ac\u201d exactly one owner per application test module",
       "file_type": "concept",
       "source_file": "tests/README.md",
       "source_location": "Repository tests",
@@ -1946,7 +1946,7 @@
     },
     {
       "id": "tests_readme_application_gate",
-      "label": "Baymax-main/check_release.py â€” existing core/toolkit and root overall gate",
+      "label": "Baymax-main/check_release.py \u00e2\u20ac\u201d existing core/toolkit and root overall gate",
       "file_type": "concept",
       "source_file": "tests/README.md",
       "source_location": "Repository tests",
@@ -1958,7 +1958,7 @@
     },
     {
       "id": "tests_readme_node_ui_check",
-      "label": "Node chat UI check â€” required in CI, local absence reported as skip",
+      "label": "Node chat UI check \u00e2\u20ac\u201d required in CI, local absence reported as skip",
       "file_type": "concept",
       "source_file": "tests/README.md",
       "source_location": "Repository tests",
@@ -1970,7 +1970,7 @@
     },
     {
       "id": "tests_readme_validation_reports",
-      "label": ".local-review/validation â€” reports and full logs",
+      "label": ".local-review/validation \u00e2\u20ac\u201d reports and full logs",
       "file_type": "concept",
       "source_file": "tests/README.md",
       "source_location": "Repository tests",
@@ -2008,7 +2008,7 @@
     },
     {
       "id": "docs_features_graphify_graph_outputs",
-      "label": "graphify-out â€” graph.json, graph.html, GRAPH_REPORT.md and FEATURE_LOG.html",
+      "label": "graphify-out \u00e2\u20ac\u201d graph.json, graph.html, GRAPH_REPORT.md and FEATURE_LOG.html",
       "file_type": "concept",
       "source_file": "docs/features/GRAPHIFY.md",
       "source_location": "Outputs and scope",
@@ -2032,7 +2032,7 @@
     },
     {
       "id": "docs_features_graphify_semantic_snapshot",
-      "label": "docs/features/semantic_graph.json â€” reviewed document relationships",
+      "label": "docs/features/semantic_graph.json \u00e2\u20ac\u201d reviewed document relationships",
       "file_type": "concept",
       "source_file": "docs/features/GRAPHIFY.md",
       "source_location": "Outputs and scope",
@@ -2044,7 +2044,7 @@
     },
     {
       "id": "docs_features_graphify_unresolved_references",
-      "label": "UNRESOLVED_REFERENCES.json â€” omitted external/unselected references",
+      "label": "UNRESOLVED_REFERENCES.json \u00e2\u20ac\u201d omitted external/unselected references",
       "file_type": "concept",
       "source_file": "docs/features/GRAPHIFY.md",
       "source_location": "Rebuild",
@@ -2125,7 +2125,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "rationale": "System CPU is machine-wide 0–100%; process CPU is core-based and may exceed 100%. Newly seen child CPU starts at its next sample; short processes may be missed."
+      "rationale": "System CPU is machine-wide 0\u2013100%; process CPU is core-based and may exceed 100%. Newly seen child CPU starts at its next sample; short processes may be missed."
     },
     {
       "id": "devops_performance_readme_performance_ram",
@@ -2320,7 +2320,7 @@
     },
     {
       "id": "baymax_main_evals_languages_readme_multilingual_provider_candidates",
-      "label": "99 sourced provider language candidates — not validated Ember support",
+      "label": "99 sourced provider language candidates \u2014 not validated Ember support",
       "file_type": "concept",
       "source_file": "Baymax-main/evals/languages/README.md",
       "source_location": "Multilingual conversations and validated language list",
@@ -2460,7 +2460,7 @@
     },
     {
       "id": "baymax_main_evals_languages_readme_multilingual_validated_audio",
-      "label": "VALIDATED_AUDIO_SIMULATION — scenario/model-specific evidence",
+      "label": "VALIDATED_AUDIO_SIMULATION \u2014 scenario/model-specific evidence",
       "file_type": "concept",
       "source_file": "Baymax-main/evals/languages/README.md",
       "source_location": "Review and compile the full list",
@@ -2555,7 +2555,7 @@
     },
     {
       "id": "docs_features_languages_multilingual_language_matrix",
-      "label": "Committed language validation matrix — none validated yet",
+      "label": "Committed language validation matrix \u2014 none validated yet",
       "file_type": "document",
       "source_file": "docs/features/LANGUAGES.md",
       "source_location": "Ember language validation",
@@ -2567,7 +2567,7 @@
     },
     {
       "id": "docs_features_opi4_language_results_opi_language_result_document",
-      "label": "Orange Pi language simulation results — 2026-11-06",
+      "label": "Orange Pi language simulation results \u2014 2026-11-06",
       "file_type": "document",
       "source_file": "docs/features/OPI4_LANGUAGE_RESULTS.md",
       "source_location": "Orange Pi language simulation results",
@@ -2727,7 +2727,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "rationale": "Percent is 0–100 across the eight-core machine."
+      "rationale": "Percent is 0\u2013100 across the eight-core machine."
     },
     {
       "id": "docs_features_opi4_language_results_opi_language_result_ram",
@@ -2865,12 +2865,102 @@
       "label": "Source integration is separate from robot deployment",
       "file_type": "concept",
       "source_file": "docs/features/OPI4_LANGUAGE_RESULTS.md",
-      "source_location": "Configuration and scope — integration paragraph",
+      "source_location": "Configuration and scope \u2014 integration paragraph",
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
       "rationale": "Original measurements retain temporary-copy provenance. The review-branch source update was not deployed to the now-unplugged robot."
+    },
+    {
+      "id": "working_protocol",
+      "label": "START HERE: mandatory working protocol and authority",
+      "file_type": "document",
+      "source_file": "docs/WORKING_PROTOCOL.md",
+      "source_location": "document",
+      "_origin": "semantic",
+      "priority": 100
+    },
+    {
+      "id": "agent_rules",
+      "label": "Mandatory Graphify-first agent instructions",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "document",
+      "_origin": "semantic",
+      "priority": 100
+    },
+    {
+      "id": "testing_protocol",
+      "label": "Software, chamber simulation, hardware and release evidence",
+      "file_type": "document",
+      "source_file": "Baymax-main/TESTING_PROTOCOL.md",
+      "source_location": "document",
+      "_origin": "semantic",
+      "priority": 100
+    },
+    {
+      "id": "channel_policy",
+      "label": "Authoritative repository, stable fixes and owner-selected channels",
+      "file_type": "document",
+      "source_file": "docs/UPDATE_CHANNELS.md",
+      "source_location": "document",
+      "_origin": "semantic",
+      "priority": 100
+    },
+    {
+      "id": "contributing",
+      "label": "Professional feature branches, pull requests and review",
+      "file_type": "document",
+      "source_file": "CONTRIBUTING.md",
+      "source_location": "document",
+      "_origin": "semantic",
+      "priority": 100
+    },
+    {
+      "id": "readme",
+      "label": "Which branch and pull request to use",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "document",
+      "_origin": "semantic",
+      "priority": 90
+    },
+    {
+      "id": "experiments",
+      "label": "Owner opt-ins and experimental testing stages",
+      "file_type": "document",
+      "source_file": "Baymax-main/features/experimental/README.md",
+      "source_location": "document",
+      "_origin": "semantic",
+      "priority": 90
+    },
+    {
+      "id": "software_stage",
+      "label": "Software testing includes direct Pi injection",
+      "file_type": "document",
+      "source_file": "Baymax-main/features/experimental/tested_in_software/README.md",
+      "source_location": "document",
+      "_origin": "semantic",
+      "priority": 80
+    },
+    {
+      "id": "sim_stage",
+      "label": "Simulation means chamber video and audio replay",
+      "file_type": "document",
+      "source_file": "Baymax-main/features/experimental/tested_in_sim/README.md",
+      "source_location": "document",
+      "_origin": "semantic",
+      "priority": 80
+    },
+    {
+      "id": "hardware_stage",
+      "label": "Physical hardware trials and lead approval",
+      "file_type": "document",
+      "source_file": "Baymax-main/features/experimental/tested_in_hardware/README.md",
+      "source_location": "document",
+      "_origin": "semantic",
+      "priority": 80
     }
   ],
   "edges": [
@@ -6381,8 +6471,89 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/features/OPI4_LANGUAGE_RESULTS.md",
-      "source_location": "Configuration and scope — integration paragraph",
+      "source_location": "Configuration and scope \u2014 integration paragraph",
       "weight": 1.0
+    },
+    {
+      "source": "working_protocol",
+      "target": "agent_rules",
+      "relation": "requires_reading",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "docs/WORKING_PROTOCOL.md",
+      "source_location": "Mandatory Graphify entry point for LLM work"
+    },
+    {
+      "source": "working_protocol",
+      "target": "testing_protocol",
+      "relation": "requires_reading",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "docs/WORKING_PROTOCOL.md",
+      "source_location": "Mandatory Graphify entry point for LLM work"
+    },
+    {
+      "source": "working_protocol",
+      "target": "channel_policy",
+      "relation": "requires_reading",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "docs/WORKING_PROTOCOL.md",
+      "source_location": "Mandatory Graphify entry point for LLM work"
+    },
+    {
+      "source": "working_protocol",
+      "target": "contributing",
+      "relation": "requires_reading",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "docs/WORKING_PROTOCOL.md",
+      "source_location": "Mandatory Graphify entry point for LLM work"
+    },
+    {
+      "source": "working_protocol",
+      "target": "readme",
+      "relation": "requires_reading",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "docs/WORKING_PROTOCOL.md",
+      "source_location": "Mandatory Graphify entry point for LLM work"
+    },
+    {
+      "source": "working_protocol",
+      "target": "experiments",
+      "relation": "requires_reading",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "docs/WORKING_PROTOCOL.md",
+      "source_location": "Mandatory Graphify entry point for LLM work"
+    },
+    {
+      "source": "working_protocol",
+      "target": "software_stage",
+      "relation": "requires_reading",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "docs/WORKING_PROTOCOL.md",
+      "source_location": "Mandatory Graphify entry point for LLM work"
+    },
+    {
+      "source": "working_protocol",
+      "target": "sim_stage",
+      "relation": "requires_reading",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "docs/WORKING_PROTOCOL.md",
+      "source_location": "Mandatory Graphify entry point for LLM work"
+    },
+    {
+      "source": "working_protocol",
+      "target": "hardware_stage",
+      "relation": "requires_reading",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "docs/WORKING_PROTOCOL.md",
+      "source_location": "Mandatory Graphify entry point for LLM work"
     }
   ],
   "hyperedges": [

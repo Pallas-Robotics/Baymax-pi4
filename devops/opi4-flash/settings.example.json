@@ -1,5 +1,5 @@
 {
-  "branch": "release",
+  "branch": "deploy",
   "wifi": {
     "ssid": "YOUR WIFI NAME",
     "password": ""

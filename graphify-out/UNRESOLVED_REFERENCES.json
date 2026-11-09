@@ -1,6 +1,6 @@
 {
   "scope": "References outside the selected project graph, including standard-library imports; not proof of missing runtime packages.",
-  "count": 919,
+  "count": 969,
   "edges": [
     {
       "source": "baymax_main_baymax_agent",
@@ -1307,7 +1307,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L19",
+      "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1318,7 +1318,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1329,7 +1329,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1340,7 +1340,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1351,7 +1351,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L23",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1362,7 +1362,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L24",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1373,7 +1373,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L25",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1384,7 +1384,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L26",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1395,7 +1395,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1406,7 +1406,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L28",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1417,7 +1417,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1428,7 +1428,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1439,7 +1439,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1450,7 +1450,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1461,7 +1461,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L33",
+      "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1472,7 +1472,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/evals/live_eval.py",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1725,7 +1725,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/conversational_ability/addressing.py",
-      "source_location": "L35",
+      "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1736,7 +1736,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/conversational_ability/addressing.py",
-      "source_location": "L36",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1747,7 +1747,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/conversational_ability/addressing.py",
-      "source_location": "L37",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1758,7 +1758,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/conversational_ability/addressing.py",
-      "source_location": "L38",
+      "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1862,6 +1862,61 @@
       "_origin": "ast"
     },
     {
+      "source": "baymax_main_features_conversational_ability_live_models",
+      "target": "copy",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/conversational_ability/live_models.py",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_conversational_ability_live_models",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/conversational_ability/live_models.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_conversational_ability_live_models",
+      "target": "re",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/conversational_ability/live_models.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_conversational_ability_live_models",
+      "target": "google_genai",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/conversational_ability/live_models.py",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_conversational_ability_live_models",
+      "target": "websockets_exceptions",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/conversational_ability/live_models.py",
+      "source_location": "L47",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "baymax_main_features_conversational_ability_processing",
       "target": "copy",
       "relation": "imports",
@@ -1923,7 +1978,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/conversational_ability/session.py",
-      "source_location": "L22",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1934,7 +1989,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/conversational_ability/session.py",
-      "source_location": "L23",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1945,7 +2000,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/conversational_ability/session.py",
-      "source_location": "L24",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1956,7 +2011,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/conversational_ability/session.py",
-      "source_location": "L25",
+      "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1967,7 +2022,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/conversational_ability/session.py",
-      "source_location": "L27",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -1978,7 +2033,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/conversational_ability/session.py",
-      "source_location": "L28",
+      "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -2155,6 +2210,17 @@
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/conversational_ability/waiting.py",
       "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_experimental_init",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/experimental/__init__.py",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -2385,7 +2451,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/pose/backend.py",
-      "source_location": "L37",
+      "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -2396,7 +2462,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/pose/backend.py",
-      "source_location": "L38",
+      "source_location": "L41",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -2407,7 +2473,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/pose/backend.py",
-      "source_location": "L39",
+      "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -2418,7 +2484,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/pose/backend.py",
-      "source_location": "L40",
+      "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -2429,7 +2495,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/pose/backend.py",
-      "source_location": "L41",
+      "source_location": "L44",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -2440,7 +2506,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/pose/backend.py",
-      "source_location": "L42",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -3567,6 +3633,17 @@
       "_origin": "ast"
     },
     {
+      "source": "baymax_main_features_toolkits_gemini_tools",
+      "target": "time",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/gemini_tools.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "baymax_main_features_toolkits_general_media_entertainment_games_brain",
       "target": "random",
       "relation": "imports",
@@ -3882,6 +3959,116 @@
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/toolkits/look_closely.py",
       "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall",
+      "target": "io",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall",
+      "target": "json",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall",
+      "target": "queue",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall",
+      "target": "shutil",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall",
+      "target": "subprocess",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall",
+      "target": "threading",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall",
+      "target": "time",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall",
+      "target": "wave",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall",
+      "target": "numpy",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L12",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4414,13 +4601,79 @@
       "_origin": "ast"
     },
     {
+      "source": "baymax_main_features_toolkits_web_search",
+      "target": "asyncio",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/web_search.py",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_web_search",
+      "target": "contextlib",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/web_search.py",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_web_search",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/web_search.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_web_search",
+      "target": "re",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/web_search.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_web_search",
+      "target": "threading",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/web_search.py",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_web_search",
+      "target": "time",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/toolkits/web_search.py",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "baymax_main_features_vision_process",
       "target": "collections",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/vision_process.py",
-      "source_location": "L19",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4431,7 +4684,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/vision_process.py",
-      "source_location": "L20",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4442,7 +4695,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/vision_process.py",
-      "source_location": "L21",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4453,7 +4706,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/vision_process.py",
-      "source_location": "L22",
+      "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4464,7 +4717,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/vision_process.py",
-      "source_location": "L23",
+      "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4475,7 +4728,18 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/vision_process.py",
-      "source_location": "L24",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_vision_process",
+      "target": "time",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/features/vision_process.py",
+      "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4486,7 +4750,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/features/vision_process.py",
-      "source_location": "L25",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4596,7 +4860,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4607,7 +4871,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L33",
+      "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4618,7 +4882,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L34",
+      "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4629,7 +4893,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4640,7 +4904,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L36",
+      "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4651,7 +4915,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L37",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4662,7 +4926,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L38",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4673,24 +4937,13 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L39",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "baymax_main_realtime_gemini_10",
-      "target": "time",
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "Baymax-main/realtime_gemini_10.py",
       "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
       "source": "baymax_main_realtime_gemini_10",
-      "target": "threading",
+      "target": "time",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4701,7 +4954,7 @@
     },
     {
       "source": "baymax_main_realtime_gemini_10",
-      "target": "collections",
+      "target": "threading",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4712,7 +4965,7 @@
     },
     {
       "source": "baymax_main_realtime_gemini_10",
-      "target": "urllib_request",
+      "target": "collections",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4723,7 +4976,7 @@
     },
     {
       "source": "baymax_main_realtime_gemini_10",
-      "target": "uuid",
+      "target": "urllib_request",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4734,7 +4987,7 @@
     },
     {
       "source": "baymax_main_realtime_gemini_10",
-      "target": "queue",
+      "target": "uuid",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4745,7 +4998,7 @@
     },
     {
       "source": "baymax_main_realtime_gemini_10",
-      "target": "wave",
+      "target": "queue",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4756,7 +5009,7 @@
     },
     {
       "source": "baymax_main_realtime_gemini_10",
-      "target": "requests",
+      "target": "wave",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4767,7 +5020,7 @@
     },
     {
       "source": "baymax_main_realtime_gemini_10",
-      "target": "cv2",
+      "target": "requests",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4778,7 +5031,7 @@
     },
     {
       "source": "baymax_main_realtime_gemini_10",
-      "target": "sounddevice",
+      "target": "cv2",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4789,12 +5042,23 @@
     },
     {
       "source": "baymax_main_realtime_gemini_10",
+      "target": "sounddevice",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Baymax-main/realtime_gemini_10.py",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_realtime_gemini_10",
       "target": "numpy",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L50",
+      "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4805,7 +5069,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L53",
+      "source_location": "L58",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4816,7 +5080,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L54",
+      "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4827,7 +5091,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L57",
+      "source_location": "L62",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -4838,7 +5102,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "Baymax-main/realtime_gemini_10.py",
-      "source_location": "L2587",
+      "source_location": "L3001",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5620,6 +5884,105 @@
       "confidence": "EXTRACTED",
       "source_file": "devops/graphify/build.py",
       "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_check",
+      "target": "json",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/graphify/check.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_check",
+      "target": "pathlib",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/graphify/check.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_check",
+      "target": "sys",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/graphify/check.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_policy",
+      "target": "hashlib",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/graphify/policy.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_policy",
+      "target": "pathlib",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/graphify/policy.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_query",
+      "target": "argparse",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/graphify/query.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_query",
+      "target": "subprocess",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/graphify/query.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_query",
+      "target": "sys",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/graphify/query.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_query",
+      "target": "ambiguous_python_import_848c643dda03",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/graphify/query.py",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -6482,6 +6845,72 @@
       "_origin": "ast"
     },
     {
+      "source": "devops_opi4_flash_verify_image",
+      "target": "argparse",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/opi4-flash/verify_image.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_opi4_flash_verify_image",
+      "target": "hashlib",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/opi4-flash/verify_image.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_opi4_flash_verify_image",
+      "target": "json",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/opi4-flash/verify_image.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_opi4_flash_verify_image",
+      "target": "pathlib",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/opi4-flash/verify_image.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_opi4_flash_verify_image",
+      "target": "re",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/opi4-flash/verify_image.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_opi4_flash_verify_image",
+      "target": "sys",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "devops/opi4-flash/verify_image.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "devops_performance_check",
       "target": "argparse",
       "relation": "imports",
@@ -6683,7 +7112,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/check_release.py",
-      "source_location": "L101",
+      "source_location": "L111",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -6695,7 +7124,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/check_release.py",
-      "source_location": "L121",
+      "source_location": "L134",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -6707,7 +7136,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/check_release.py",
-      "source_location": "L130",
+      "source_location": "L143",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -6719,7 +7148,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/check_release.py",
-      "source_location": "L136",
+      "source_location": "L149",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -6731,7 +7160,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/check_release.py",
-      "source_location": "L149",
+      "source_location": "L162",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7151,7 +7580,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/dev_settings.py",
-      "source_location": "L87",
+      "source_location": "L103",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7163,7 +7592,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/dev_settings.py",
-      "source_location": "L89",
+      "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7175,7 +7604,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/dev_settings.py",
-      "source_location": "L90",
+      "source_location": "L106",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7187,7 +7616,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/dev_settings.py",
-      "source_location": "L92",
+      "source_location": "L108",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7571,7 +8000,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/conversational_ability/addressing.py",
-      "source_location": "L50",
+      "source_location": "L72",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7583,7 +8012,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/conversational_ability/addressing.py",
-      "source_location": "L62",
+      "source_location": "L84",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7595,7 +8024,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/conversational_ability/addressing.py",
-      "source_location": "L67",
+      "source_location": "L92",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7619,7 +8048,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/conversational_ability/engage.py",
-      "source_location": "L43",
+      "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7631,7 +8060,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/conversational_ability/engage.py",
-      "source_location": "L52",
+      "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7643,7 +8072,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/conversational_ability/session.py",
-      "source_location": "L48",
+      "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7655,7 +8084,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/conversational_ability/session.py",
-      "source_location": "L67",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7667,7 +8096,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/conversational_ability/session.py",
-      "source_location": "L68",
+      "source_location": "L84",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7728,6 +8157,18 @@
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/conversational_ability/waiting.py",
       "source_location": "L74",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_experimental_init_enabled",
+      "target": "os",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Baymax-main/features/experimental/__init__.py",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7811,7 +8252,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/persona.py",
-      "source_location": "L218",
+      "source_location": "L236",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7823,7 +8264,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/pose/backend.py",
-      "source_location": "L193",
+      "source_location": "L200",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7835,7 +8276,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/pose/backend.py",
-      "source_location": "L202",
+      "source_location": "L209",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7847,7 +8288,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/pose/backend.py",
-      "source_location": "L416",
+      "source_location": "L423",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8687,7 +9128,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/experimental.py",
-      "source_location": "L132",
+      "source_location": "L135",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8699,7 +9140,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/experimental.py",
-      "source_location": "L136",
+      "source_location": "L139",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8711,7 +9152,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/experimental.py",
-      "source_location": "L208",
+      "source_location": "L211",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8723,7 +9164,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/experimental.py",
-      "source_location": "L223",
+      "source_location": "L229",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8759,7 +9200,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/family/tools.py",
-      "source_location": "L76",
+      "source_location": "L77",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8771,7 +9212,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/family/tools.py",
-      "source_location": "L82",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8783,7 +9224,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/family/tools.py",
-      "source_location": "L92",
+      "source_location": "L99",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8795,7 +9236,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/family/tools.py",
-      "source_location": "L107",
+      "source_location": "L114",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8807,7 +9248,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/family/tools.py",
-      "source_location": "L111",
+      "source_location": "L118",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8856,66 +9297,6 @@
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/feeds.py",
       "source_location": "L43",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "baymax_main_features_toolkits_gemini_tools_search_enabled",
-      "target": "os",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/toolkits/gemini_tools.py",
-      "source_location": "L86",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "baymax_main_features_toolkits_gemini_tools_enabled",
-      "target": "os",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/toolkits/gemini_tools.py",
-      "source_location": "L90",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "baymax_main_features_toolkits_gemini_tools_extend_config",
-      "target": "copy",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/toolkits/gemini_tools.py",
-      "source_location": "L105",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "baymax_main_features_toolkits_gemini_tools_handle_tool_call",
-      "target": "asyncio",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/toolkits/gemini_tools.py",
-      "source_location": "L180",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "baymax_main_features_toolkits_gemini_tools_prewarm",
-      "target": "threading",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/toolkits/gemini_tools.py",
-      "source_location": "L209",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9112,6 +9493,66 @@
       "_origin": "ast"
     },
     {
+      "source": "baymax_main_features_toolkits_offline_fall_speech",
+      "target": "shutil",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall_speech",
+      "target": "subprocess",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall_speech",
+      "target": "wave",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L65",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall_speech",
+      "target": "io",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L65",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_features_toolkits_offline_fall_speech",
+      "target": "numpy",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Baymax-main/features/toolkits/offline_fall.py",
+      "source_location": "L68",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "baymax_main_features_toolkits_preferences_profile_name",
       "target": "re",
       "relation": "calls",
@@ -9131,7 +9572,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/proactive.py",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9143,7 +9584,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/proactive.py",
-      "source_location": "L87",
+      "source_location": "L88",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9155,7 +9596,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/proactive.py",
-      "source_location": "L93",
+      "source_location": "L94",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9167,7 +9608,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/proactive.py",
-      "source_location": "L99",
+      "source_location": "L100",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9179,7 +9620,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/toolkits/proactive.py",
-      "source_location": "L132",
+      "source_location": "L133",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9316,30 +9757,6 @@
       "_origin": "ast"
     },
     {
-      "source": "baymax_main_features_vision_process_main",
-      "target": "os",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/vision_process.py",
-      "source_location": "L94",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "baymax_main_features_vision_process_main",
-      "target": "pickle",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/vision_process.py",
-      "source_location": "L106",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
       "source": "baymax_main_gemini_preflight_configured_models",
       "target": "ast",
       "relation": "calls",
@@ -9347,7 +9764,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/gemini_preflight.py",
-      "source_location": "L16",
+      "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9359,7 +9776,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/gemini_preflight.py",
-      "source_location": "L22",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9431,7 +9848,43 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/pc_hardware.py",
-      "source_location": "L88",
+      "source_location": "L96",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_pc_hardware_gil_switch_ms",
+      "target": "os",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Baymax-main/pc_hardware.py",
+      "source_location": "L155",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_pc_hardware_fast_core_settings",
+      "target": "sys",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Baymax-main/pc_hardware.py",
+      "source_location": "L186",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_pc_hardware_place_vision_child",
+      "target": "os",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Baymax-main/pc_hardware.py",
+      "source_location": "L206",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9443,7 +9896,19 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/pc_hardware.py",
-      "source_location": "L105",
+      "source_location": "L238",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "baymax_main_pc_hardware_use_performance_cpus",
+      "target": "sys",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Baymax-main/pc_hardware.py",
+      "source_location": "L257",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9455,7 +9920,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/pc_hardware.py",
-      "source_location": "L127",
+      "source_location": "L263",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9467,7 +9932,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/pc_hardware.py",
-      "source_location": "L205",
+      "source_location": "L341",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9479,7 +9944,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/pc_hardware.py",
-      "source_location": "L216",
+      "source_location": "L352",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9539,7 +10004,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Baymax-main/run_pc.py",
-      "source_location": "L45",
+      "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9767,7 +10232,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "devops/graphify/build.py",
-      "source_location": "L108",
+      "source_location": "L111",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9779,7 +10244,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "devops/graphify/build.py",
-      "source_location": "L150",
+      "source_location": "L169",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9791,7 +10256,55 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "devops/graphify/build.py",
-      "source_location": "L161",
+      "source_location": "L187",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_check_check",
+      "target": "json",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "devops/graphify/check.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_policy_fingerprints",
+      "target": "hashlib",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "devops/graphify/policy.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_query_main",
+      "target": "argparse",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "devops/graphify/query.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_graphify_query_main",
+      "target": "subprocess",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "devops/graphify/query.py",
+      "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10103,7 +10616,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "devops/opi4-flash/image_settings.py",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10115,7 +10628,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "devops/opi4-flash/image_settings.py",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10127,7 +10640,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "devops/opi4-flash/image_settings.py",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10139,7 +10652,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "devops/opi4-flash/image_settings.py",
-      "source_location": "L69",
+      "source_location": "L70",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10151,7 +10664,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "devops/opi4-flash/image_settings.py",
-      "source_location": "L83",
+      "source_location": "L84",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10163,7 +10676,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "devops/opi4-flash/image_settings.py",
-      "source_location": "L83",
+      "source_location": "L84",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10175,7 +10688,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "devops/opi4-flash/image_settings.py",
-      "source_location": "L93",
+      "source_location": "L94",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10187,7 +10700,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "devops/opi4-flash/image_settings.py",
-      "source_location": "L93",
+      "source_location": "L94",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10428,6 +10941,54 @@
       "confidence_score": 1.0,
       "source_file": "devops/opi4-flash/payload/ember-status.py",
       "source_location": "L70",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_opi4_flash_verify_image_sha256",
+      "target": "hashlib",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "devops/opi4-flash/verify_image.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_opi4_flash_verify_image_verify",
+      "target": "json",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "devops/opi4-flash/verify_image.py",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_opi4_flash_verify_image_verify",
+      "target": "re",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "devops/opi4-flash/verify_image.py",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "devops_opi4_flash_verify_image_main",
+      "target": "argparse",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "devops/opi4-flash/verify_image.py",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast"
     }

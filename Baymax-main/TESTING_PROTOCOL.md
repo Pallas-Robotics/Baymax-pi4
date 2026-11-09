@@ -1,5 +1,38 @@
 # Ember testing and review protocol
 
+Start with the [mandatory working protocol](../docs/WORKING_PROTOCOL.md) and
+[contribution route](../CONTRIBUTING.md). Pallas-Robotics/Baymax-pi4 publishes Ember; device
+owners use an approved deploy revision, while contributors review a draft PR
+from a feature branch targeting main. Existing deploy behavior takes priority.
+
+## Validation stages and promotion authority
+
+1. **Experimental:** unvalidated bench development, owner opt-in only.
+2. **Software:** automated core/toolkit/regression tests and direct synthetic
+   inputs. Injecting landmarks or PCM on an Orange Pi is still this stage.
+3. **Simulation:** the chamber shows known footage to the real camera and replays
+   known audio into the real microphone; record expected/actual outputs.
+4. **Hardware:** controlled safe physical trials on the named board, OS, models
+   and peripherals, with resource/latency and recovery evidence.
+5. **Deploy:** the software lead reviews the relevant evidence and approves the
+   exact source revision. CI or a directory name cannot grant this approval.
+
+Language adaptation and offline fall check-ins remain software-only until the
+chamber and physical checks are recorded. Keep their stages in
+[experimental features](features/experimental/README.md) current. A behavior,
+model or audio/camera change requires rerunning affected evidence. Never mark
+pending, skipped or failed checks as passed.
+
+Every PR records source revision, commands/results, known regressions, failures,
+skips, data flows, dependencies and rollback/data compatibility. New work must
+preserve working deployed features. Follow [channel policy](../docs/UPDATE_CHANNELS.md):
+owner channel selection is independent of feature opt-in; synchronization of
+approved deploy fixes happens through reviewed GitHub PRs, not on-device merges.
+
+Before submitting, rebuild changed protocol sources and run
+`python devops/graphify/check.py` from the repository root. The graph must point
+to these rules before implementation details.
+
 Every feature PR must verify both the core runtime and the relevant toolkits. Authors test and provide evidence; the software lead reviews the results and decides whether to approve. An offline pass is not deployment approval.
 
 ## 1. Run the offline gate

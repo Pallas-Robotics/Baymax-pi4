@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch
 
 import requests
 from features.conversational_ability import live_models
-from gemini_preflight import PreflightError, configured_models, validate_key
+from gemini_preflight import PreflightError, PreflightUnavailable, configured_models, validate_key
 import run_pc
 
 RUNTIME = Path(__file__).resolve().parents[1] / "realtime_gemini_8.py"
@@ -152,3 +152,17 @@ class GeminiPreflightTests(unittest.TestCase):
         self.assertEqual([call[0] for call in order.mock_calls], ["pin", "validate", "runtime"])
         self.assertIn("Google accepted the key", output)
         self.assertNotIn(KEY, output)
+
+    def test_network_unavailable_allows_local_monitoring_without_claiming_key_verified(self):
+        with patch("device_config.get", return_value=True), patch("features.toolkits.offline_fall.enabled", return_value=True):
+            result, output, _, runtime, _ = self.startup(error=PreflightUnavailable("offline"))
+        self.assertEqual(result, 0)
+        runtime.assert_called_once()
+        self.assertIn("Starting local fall monitoring", output)
+        self.assertNotIn("Google accepted", output)
+
+    def test_offline_start_stops_when_local_checkins_are_disabled(self):
+        with patch("features.toolkits.offline_fall.enabled", return_value=False):
+            result, _, _, runtime, _ = self.startup(error=PreflightUnavailable("offline"))
+        self.assertEqual(result, 1)
+        runtime.assert_not_called()

@@ -10,6 +10,10 @@ class PreflightError(RuntimeError):
     """Safe, user-facing startup failure; never include a raw provider exception."""
 
 
+class PreflightUnavailable(PreflightError):
+    """Network verification could not complete; distinct from a rejected credential."""
+
+
 def configured_models(runtime_path):
     # Read the core's actual settings without importing its hardware/audio modules.
     try:
@@ -50,9 +54,9 @@ def validate_key(api_key, runtime_path, session_factory=None, live_models=None):
                         listed.append(model)
                         break
     except requests.Timeout:
-        raise PreflightError("Gemini key verification timed out. Check your internet connection and retry.") from None
+        raise PreflightUnavailable("Gemini key verification timed out. Check your internet connection and retry.") from None
     except requests.RequestException:
-        raise PreflightError("Could not reach Google to verify the key. Check your internet/proxy settings and retry.") from None
+        raise PreflightUnavailable("Could not reach Google to verify the key. Check your internet/proxy settings and retry.") from None
     return tuple(listed)
 
 

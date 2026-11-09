@@ -6,7 +6,7 @@ if [ "${ID:-}" != "debian" ] || [ "${VERSION_ID:-}" != "13" ]; then
   echo "This prerequisite installer is for Debian 13. Ask your lead for your distribution's packages."
   exit 1
 fi
-PACKAGES=(curl ca-certificates git libportaudio2 libgl1 libegl1 libgles2 libglib2.0-0t64 libsndfile1 libasound2-plugins build-essential cmake pkg-config xdg-utils xfce4-terminal)
+PACKAGES=(espeak-ng curl ca-certificates git libportaudio2 libgl1 libegl1 libgles2 libglib2.0-0t64 libsndfile1 libasound2-plugins build-essential cmake pkg-config xdg-utils xfce4-terminal)
 BROWSER_FOUND=0
 for BROWSER in firefox firefox-esr chromium chromium-browser x-www-browser; do
   if command -v "$BROWSER" >/dev/null 2>&1; then BROWSER_FOUND=1; break; fi

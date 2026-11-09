@@ -7,6 +7,8 @@ import re
 import subprocess
 import sys
 
+from policy import SOURCES, fingerprints, semantic_graph
+
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'graphify-out'
 EXCLUDES = ['**/.local-review/**', '**/tests/**', 'test/**', '**/upstream/**',
@@ -105,7 +107,13 @@ def main():
     if detection['total_files'] > 500 or detection['total_words'] > 2_000_000:
         raise SystemExit('Corpus exceeds the reviewed scope; narrow EXCLUDES before rebuilding.')
     structural = extract([Path(p) for p in detection['files']['code']], cache_root=ROOT, root=ROOT)
-    semantic = json.loads((ROOT / 'docs/features/semantic_graph.json').read_text(encoding='utf-8'))
+    semantic_path = ROOT / 'docs/features/semantic_graph.json'
+    semantic = json.loads(semantic_path.read_text(encoding='utf-8'))
+    protocol = semantic_graph()
+    policy_ids = {node['id'] for node in protocol['nodes']}
+    semantic['nodes'] = [node for node in semantic['nodes'] if node['id'] not in policy_ids] + protocol['nodes']
+    semantic['edges'] = [edge for edge in semantic['edges'] if edge.get('source') != 'working_protocol'] + protocol['edges']
+    semantic_path.write_text(json.dumps(semantic, indent=2), encoding='utf-8')
     ids = {n['id'] for n in structural['nodes']}
     nodes = structural['nodes'] + [n for n in semantic['nodes'] if n['id'] not in ids]
     extraction = dict(nodes=nodes, edges=structural['edges'] + semantic['edges'],
@@ -118,6 +126,17 @@ def main():
             if '..' in relative.parts or not (ROOT / relative).is_file():
                 raise ValueError('Invalid source reference: ' + source)
             item['source_file'] = relative.as_posix()
+    # AGENTS explicitly applies the working protocol to all public source changes.
+    representatives = {}
+    for node in structural['nodes']:
+        if node.get('source_file'):
+            source = Path(node['source_file'])
+            relative = source.relative_to(ROOT).as_posix() if source.is_absolute() else source.as_posix()
+            representatives.setdefault(relative, node['id'])
+    extraction['edges'].extend({'source': 'working_protocol', 'target': node_id,
+        'relation': 'governs_changes_to', 'confidence': 'EXTRACTED', 'confidence_score': 1,
+        'source_file': 'AGENTS.md', 'source_location': 'Mandatory working protocol'}
+        for node_id in representatives.values())
     raw_health = diagnose_extraction(extraction, directed=False, root=str(ROOT))
     node_ids = {node['id'] for node in extraction['nodes']}
     unresolved = [edge for edge in extraction['edges']
@@ -146,10 +165,17 @@ def main():
     if not to_json(graph, communities, str(OUT / 'graph.json'), community_labels=labels):
         raise ValueError('Graphify refused to shrink the existing graph; review scope before replacing it')
     report = generate(graph, communities, cohesion, labels, gods, surprises, detection,
-                      {'input': 0, 'output': 0}, 'Pallas-Robotics/Baymax', suggested_questions=questions)
+                      {'input': 0, 'output': 0}, 'Pallas-Robotics/Baymax-pi4', suggested_questions=questions)
     report = re.sub(r'^- Token cost:.*$', '- Token usage: structural extraction uses no LLM; semantic usage was not reported by the host.', report, flags=re.MULTILINE)
-    report = '[Organized OPi4 V1 feature log](../docs/features/FEATURE_LOG.md) · [Interactive graph](graph.html) · [Rendered feature log](FEATURE_LOG.html)\n\n' + report
+    report = '[START HERE: required working protocol](../docs/WORKING_PROTOCOL.md) · [Testing protocol](../Baymax-main/TESTING_PROTOCOL.md) · [Contribution route](../CONTRIBUTING.md)\n\n[Feature log](../docs/features/FEATURE_LOG.md) · [Interactive graph](graph.html) · [Rendered feature log](FEATURE_LOG.html)\n\n' + report
     report += '\n## Scope and integrity\n\nThe graph is documentation, not a hardware certification. Local paths are repository-relative. ' + str(len(unresolved)) + ' unresolved/external references (including standard-library imports) are omitted from this project-only view and retained in `UNRESOLVED_REFERENCES.json`; these are not claimed to be missing runtime dependencies. Parallel relationships can collapse in the native undirected view; raw semantic evidence remains in `docs/features/semantic_graph.json`.\n\nProject-view health:\n\n```json\n' + json.dumps(health, indent=2, default=str) + '\n```\n\nRaw extraction health before scope filtering:\n\n```json\n' + json.dumps(raw_health, indent=2, default=str) + '\n```\n'
+    graph_data = json.loads((OUT / 'graph.json').read_text(encoding='utf-8'))
+    normalized_ids = {node.get('source_file'): node['id'] for node in graph_data['nodes']}
+    graph_data['protocol_entrypoints'] = [{'id': normalized_ids[source], 'policy_key': key, 'source_file': source, 'priority': priority}
+        for key, (source, _label, priority) in SOURCES.items()]
+    (OUT / 'graph.json').write_text(json.dumps(graph_data, separators=(',', ':')), encoding='utf-8')
+    (OUT / 'protocol_manifest.json').write_text(json.dumps({'source_hashes': fingerprints()}, indent=2), encoding='utf-8')
+    (OUT / 'START_HERE.md').write_text((ROOT / 'docs/WORKING_PROTOCOL.md').read_text(encoding='utf-8'), encoding='utf-8')
     (OUT / 'GRAPH_REPORT.md').write_text(report, encoding='utf-8')
     (OUT / '.graphify_labels.json').write_text(json.dumps({str(k): v for k, v in labels.items()}), encoding='utf-8')
     (OUT / '.graphify_analysis.json').write_text(json.dumps(dict(communities=communities, cohesion=cohesion, gods=gods, surprises=surprises, questions=questions)), encoding='utf-8')
@@ -162,7 +188,7 @@ def main():
     log = (ROOT / 'docs/features/FEATURE_LOG.md').read_text(encoding='utf-8')
     (OUT / 'FEATURE_LOG.html').write_text(feature_html(log), encoding='utf-8')
     native = OUT / 'graph.html'
-    link = '<a id="feature-log-link" href="FEATURE_LOG.html" style="position:fixed;bottom:18px;left:18px;z-index:9999;padding:9px 14px;background:#fff;color:#202420;border:1px solid #777;border-radius:6px;font:14px system-ui">Organized feature log</a>'
+    link = '<a id="feature-log-link" href="../docs/WORKING_PROTOCOL.md" style="position:fixed;bottom:18px;left:18px;z-index:9999;padding:9px 14px;background:#fff;color:#202420;border:1px solid #777;border-radius:6px;font:14px system-ui">Working protocol / feature log</a>'
     native.write_text(native.read_text(encoding='utf-8').replace('</body>', link + '</body>'), encoding='utf-8')
     print(f'Graph: {graph.number_of_nodes()} nodes, {graph.number_of_edges()} edges, {len(communities)} communities')
     print('Cohesion:', {labels[k] + ' ' + str(k): round(v, 3) for k, v in cohesion.items()})

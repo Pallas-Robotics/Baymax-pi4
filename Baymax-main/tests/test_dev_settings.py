@@ -30,6 +30,29 @@ class ConfigurationTests(unittest.TestCase):
         self.assertFalse(result["conversational_ability"])
         self.assertEqual(result["noise_suppression_level"], "2")
 
+    def test_experiments_default_off_and_each_owner_opt_in_survives_other_saves(self):
+        result = save_configuration(self.path, self.payload(), CATALOG)
+        self.assertTrue(all(not feature["enabled"] for feature in result["experimental_features"].values()))
+        result = save_configuration(self.path, self.payload(experimental_features={"language_adaptation": True}), CATALOG)
+        self.assertTrue(result["experimental_features"]["language_adaptation"]["enabled"])
+        self.assertFalse(result["experimental_features"]["offline_fall_checkin"]["enabled"])
+        result = save_configuration(self.path, self.payload(), CATALOG)
+        self.assertTrue(result["experimental_features"]["language_adaptation"]["enabled"])
+        result = save_configuration(self.path, self.payload(experimental_features={"language_adaptation": False,
+                                                                                 "offline_fall_checkin": True}), CATALOG)
+        self.assertFalse(result["experimental_features"]["language_adaptation"]["enabled"])
+        self.assertTrue(result["experimental_features"]["offline_fall_checkin"]["enabled"])
+
+    def test_invalid_experimental_opt_in_does_not_overwrite_settings(self):
+        save_configuration(self.path, self.payload(), CATALOG)
+        before = self.path.read_bytes()
+        for choices in ({"unknown": True}, {"language_adaptation": "true"}, True, []):
+            with self.assertRaises(ValueError):
+                save_configuration(self.path, self.payload(experimental_features=choices), CATALOG)
+            self.assertEqual(self.path.read_bytes(), before)
+        with self.assertRaisesRegex(ValueError, "camera"):
+            save_configuration(self.path, self.payload(camera="none", experimental_features={"offline_fall_checkin": True}), CATALOG)
+
     def test_invalid_noise_level_does_not_overwrite_settings(self):
         save_configuration(self.path, self.payload(), CATALOG)
         before = self.path.read_bytes()

@@ -1,0 +1,42 @@
+{
+  "deploy": {
+    "commit": "6056177f18bdd2df7f7f082fb41890dcef9df50a",
+    "destination_branch": "archive/natey/deploy"
+  },
+  "experimental": {
+    "commit": "6056177f18bdd2df7f7f082fb41890dcef9df50a",
+    "destination_branch": "archive/natey/experimental"
+  },
+  "main": {
+    "commit": "6056177f18bdd2df7f7f082fb41890dcef9df50a",
+    "destination_branch": "archive/natey/main"
+  },
+  "needshardwaretest": {
+    "commit": "6056177f18bdd2df7f7f082fb41890dcef9df50a",
+    "destination_branch": "archive/natey/needshardwaretest"
+  },
+  "needssimtest": {
+    "commit": "6056177f18bdd2df7f7f082fb41890dcef9df50a",
+    "destination_branch": "archive/natey/needssimtest"
+  },
+  "needssoftwaretest": {
+    "commit": "6056177f18bdd2df7f7f082fb41890dcef9df50a",
+    "destination_branch": "archive/natey/needssoftwaretest"
+  },
+  "offline-fall-checkin": {
+    "commit": "6eb21db2551c458f373752b1825746680e924065",
+    "destination_branch": "archive/natey/offline-fall-checkin"
+  },
+  "opi4-chat-timing": {
+    "commit": "54ee70ecd5d182abf70daab4bc92cb58e38a01d9",
+    "destination_branch": "archive/natey/opi4-chat-timing"
+  },
+  "release": {
+    "commit": "551f80a8fec73f8e19bf5948255152dd1380822d",
+    "destination_branch": "archive/natey/release"
+  },
+  "sd-card-flash": {
+    "commit": "df99367b9e5048299b73652e4dbfc4ce60db6779",
+    "destination_branch": "archive/natey/sd-card-flash"
+  }
+}

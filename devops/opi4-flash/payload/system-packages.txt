@@ -1,4 +1,4 @@
-sudo git curl ca-certificates python3 avahi-daemon libnss-mdns
+espeak-ng sudo git curl ca-certificates python3 avahi-daemon libnss-mdns
 xfce4 xfce4-terminal lightdm lightdm-gtk-greeter xserver-xorg-core
 xserver-xorg-video-dummy dbus-x11 x11-xserver-utils
 libportaudio2 libgl1 libegl1 libgles2 libglib2.0-0t64 libsndfile1

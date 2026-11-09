@@ -6,7 +6,7 @@ import sys
 from dotenv import load_dotenv
 from pc_hardware import use_performance_cpus
 from secret_config import CredentialError, gemini_key
-from gemini_preflight import PreflightError, validate_key
+from gemini_preflight import PreflightError, PreflightUnavailable, validate_key
 from features.conversational_ability import live_models
 
 ROOT = Path(__file__).resolve().parent
@@ -37,10 +37,19 @@ def main():
     try:
         # v10 connects with the first of its Live models (BAYMAX_LIVE_MODELS) this key can use.
         validate_key(key, RUNTIME, live_models=live_models.configured)
+    except PreflightUnavailable:
+        from features.toolkits.offline_fall import enabled
+        import device_config
+        if not enabled() or not (device_config.get("fall_detection.enabled") or
+                                os.getenv("BAYMAX_FALL_DETECTION_ENABLED", "0") == "1"):
+            print("Startup stopped: Google could not be reached and offline fall check-ins are disabled.", file=sys.stderr)
+            return 1
+        print("Google could not be reached. Starting local fall monitoring; Gemini will retry when connectivity returns.", flush=True)
     except PreflightError as error:
         print(f"Startup stopped: {error}", file=sys.stderr)
         return 1
-    print("Google accepted the key; configured models are accessible. Live-session quota/access will be checked when connecting.", flush=True)
+    else:
+        print("Google accepted the key; configured models are accessible. Live-session quota/access will be checked when connecting.", flush=True)
     print("Starting Gemini Live version 10 with the configured audio devices.", flush=True)
     print("Microphone audio and camera frames are sent to Gemini; upstream also records session audio locally.", flush=True)
     os.environ["GOOGLE_API_KEY"] = key  # Process-local only; never copy a key file into .env.

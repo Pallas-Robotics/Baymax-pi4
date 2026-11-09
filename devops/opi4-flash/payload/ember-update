@@ -7,7 +7,7 @@ export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
 if [ -d /opt/ember-provision/wheels ]; then export UV_FIND_LINKS=/opt/ember-provision/wheels; fi
 BASE="$HOME/ember-deployment"
 DEFAULT_BRANCH='image-release'
-DEFAULT_REPOSITORY='https://github.com/Pallas-Robotics/Baymax.git'  # as image_settings.REPOSITORY
+DEFAULT_REPOSITORY='https://github.com/Pallas-Robotics/Baymax-pi4.git'  # as image_settings.REPOSITORY
 # data: memory, reminders and logs (BAYMAX_DATA_DIR); shared: downloaded models. Both outlive releases.
 mkdir -p "$BASE/releases" "$BASE/logs" "$BASE/data" "$BASE/shared"
 exec >>"$BASE/logs/update.log" 2>&1

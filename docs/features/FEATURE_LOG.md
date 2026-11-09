@@ -1,5 +1,7 @@
 # OPi4 V1 feature log
 
+Reconciled OPI4 candidate: [sources, preserved work and validation boundaries](../OPI4_RECONCILIATION.md). Language guidance and local fall check-ins require separate owner opt-ins; both remain software-tested experiments. OPI5 performance measurements apply only to their named hardware.
+
 An inventory of the Orange Pi repository, not a claim that every feature works on
 every board. Runtime data, models, credentials, recordings and SD images stay out
 of this inventory and Git.

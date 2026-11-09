@@ -3,6 +3,7 @@ import copy
 import contextlib
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -16,8 +17,14 @@ from test_live_eval import FakeSession, connector, server
 
 
 class LanguageEvaluationTests(unittest.TestCase):
+    def test_real_mvp_session_omits_experimental_language_guidance_when_disabled(self):
+        with patch.dict(os.environ, {"BAYMAX_LANGUAGE_ADAPTATION_ENABLED": "0"}):
+            _, config = live_eval.mvp_session()
+        self.assertNotIn('[LANGUAGE]', config['system_instruction'])
+
     def test_real_mvp_session_includes_language_adaptation(self):
-        _, config = live_eval.mvp_session()
+        with patch.dict(os.environ, {"BAYMAX_LANGUAGE_ADAPTATION_ENABLED": "1"}):
+            _, config = live_eval.mvp_session()
         prompt = config['system_instruction']
         self.assertIn('[LANGUAGE]', prompt)
         self.assertIn('switch with them on your next reply', prompt)

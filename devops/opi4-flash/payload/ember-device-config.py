@@ -7,9 +7,9 @@ import re
 import tempfile
 from urllib.parse import urlsplit
 
-# Same repository as image_settings.REPOSITORY; release is also devops/mvp/update.py's default.
-DEFAULTS = {'repository': 'https://github.com/Pallas-Robotics/Baymax.git',
-            'branch': 'release', 'auto_update': True}
+# New SD owners follow deploy. Existing saved choices and the legacy release branch remain supported.
+DEFAULTS = {'repository': 'https://github.com/Pallas-Robotics/Baymax-pi4.git',
+            'branch': 'deploy', 'auto_update': True}
 
 
 def validate(values):

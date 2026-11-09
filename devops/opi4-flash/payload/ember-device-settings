@@ -24,7 +24,22 @@ while CHOICE=$(whiptail --title 'Ember Device Settings' --menu 'Choose what to c
       SETTINGS=$("$PYTHON" "$CONFIG" read) || { read -r -p 'Press Enter to return.'; continue; }
       mapfile -t VALUES <<<"$SETTINGS"
       REPO=$(whiptail --title 'Ember Git repository' --inputbox 'HTTPS URL of an Ember-compatible repository. Keep credentials out of the URL.' 11 80 "${VALUES[0]}" 3>&1 1>&2 2>&3) || continue
-      BRANCH=$(whiptail --title 'Ember Git branch' --inputbox 'Branch to deploy. Use a reviewed branch compatible with this board.' 10 80 "${VALUES[1]}" 3>&1 1>&2 2>&3) || continue
+      case "${VALUES[1]}" in
+        deploy|needshardwaretest|needssimtest|needssoftwaretest|experimental) SELECTED=${VALUES[1]} ;;
+        *) SELECTED=custom ;;
+      esac
+      CHANNEL=$(whiptail --default-item "$SELECTED" --title 'Ember version / release channel' --menu "Current branch: ${VALUES[1]}. Experiments still require separate opt-ins." 19 84 6 \
+        deploy 'Deploy: approved normal-use baseline' \
+        needshardwaretest 'Hardware test: chamber evidence accepted, physical checks pending' \
+        needssimtest 'Sim test: software evidence accepted, chamber replay pending' \
+        needssoftwaretest 'Software test: candidate awaiting software validation' \
+        experimental 'Purely experimental: unvalidated bench development' \
+        custom 'Advanced: keep or enter another branch' 3>&1 1>&2 2>&3) || continue
+      if [ "$CHANNEL" = custom ]; then
+        BRANCH=$(whiptail --title 'Ember Git branch' --inputbox 'Enter a board-compatible branch.' 10 80 "${VALUES[1]}" 3>&1 1>&2 2>&3) || continue
+      else
+        BRANCH=$CHANNEL
+      fi
       AUTO=false
       if whiptail --title 'Automatic Git updates' --yesno 'Check Git and install validated updates on every boot? Choose No for manual updates only.' 10 76; then AUTO=true; fi
       if RESULT=$("$PYTHON" "$CONFIG" save --repository "$REPO" --branch "$BRANCH" --auto-update "$AUTO" 2>&1); then

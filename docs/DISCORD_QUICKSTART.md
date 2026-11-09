@@ -1,10 +1,10 @@
 # Discord quick-start messages
 
-Copy each block below as a separate Discord message. These instructions match this repository's `release` branch (Pallas-Robotics/Baymax, the Orange Pi fork of JoeKojima/Baymax), not an approved production deployment.
+Copy each block below as a separate Discord message. These instructions match this repository's `release` branch (Pallas-Robotics/Baymax-pi4, the Orange Pi fork of JoeKojima/Baymax), not an approved production deployment.
 
 ```text
 **Ember: download and run**
-1. Download the latest ZIP: https://github.com/Pallas-Robotics/Baymax/archive/refs/heads/release.zip
+1. Download the latest ZIP: https://github.com/Pallas-Robotics/Baymax-pi4/archive/refs/heads/release.zip
 2. Extract the ENTIRE ZIP into a permanent folder, e.g. Desktop/Ember. Don't run files inside the ZIP.
 3. Open devops -> clickables -> Windows, macOS or Linux.
 4. Open **1 - Setup** (.cmd on Windows, .command on Mac, .sh on Linux). Wait while it installs private Python 3.12, packages/model and runs checks. Internet is required; your existing Python isn't replaced.

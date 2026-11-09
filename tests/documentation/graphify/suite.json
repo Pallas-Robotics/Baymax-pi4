@@ -6,7 +6,12 @@
     "graphify-out/**",
     "README.md",
     "AGENTS.md",
-    "devops/EDITING_PROTOCOL.md"
+    "devops/EDITING_PROTOCOL.md",
+    "docs/WORKING_PROTOCOL.md",
+    "docs/UPDATE_CHANNELS.md",
+    "CONTRIBUTING.md",
+    "Baymax-main/TESTING_PROTOCOL.md",
+    "Baymax-main/features/experimental/**"
   ],
   "python": [
     {

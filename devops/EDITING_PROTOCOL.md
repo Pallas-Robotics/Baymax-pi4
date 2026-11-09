@@ -7,7 +7,7 @@ deploy, contact recipients or start hardware capture without task authorization.
 
 ## 1. Establish the right scope
 
-- Orange Pi work belongs in `Pallas-Robotics/Baymax`. Check `git remote -v`,
+- Orange Pi work belongs in `Pallas-Robotics/Baymax-pi4`. Check `git remote -v`,
   branch and working-tree status. LattePanda's old PR #20 is a separate line.
 - Start a focused branch from `main`. `release` is the robot update channel;
   do not move it as a side effect of development.

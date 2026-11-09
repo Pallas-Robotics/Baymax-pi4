@@ -1,5 +1,7 @@
 # Ember for Orange Pi
 
+Start with the [working protocol](docs/WORKING_PROTOCOL.md) and [OPI4 reconciliation](docs/OPI4_RECONCILIATION.md). This repository is the OPI4 destination; active OPI5 branches remain in [Pallas-Robotics/Baymax](https://github.com/Pallas-Robotics/Baymax).
+
 Ember is a voice companion with Gemini conversation, optional eyes and camera,
 CPU/NPU pose processing, memories and callable information/support tools.
 
@@ -42,7 +44,7 @@ serial wiring/configuration.
 ## Get and start the application
 
 ```bash
-git clone https://github.com/Pallas-Robotics/Baymax.git
+git clone https://github.com/Pallas-Robotics/Baymax-pi4.git
 cd Baymax
 ```
 

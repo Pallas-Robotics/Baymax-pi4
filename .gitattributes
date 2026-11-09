@@ -6,3 +6,6 @@
 *.command text eol=lf
 *.cmd text eol=crlf
 Baymax-main/requirements.txt -text
+
+# Native Graphify exports are generated; review the protocol and builder sources.
+graphify-out/** linguist-generated=true

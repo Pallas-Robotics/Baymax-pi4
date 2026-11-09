@@ -17,7 +17,9 @@
     "Baymax-main/tests/test_public_core_integration.py",
     "Baymax-main/tests/test_waiting_cue.py",
     "Baymax-main/tests/test_toolkit_audiobooks.py",
-    "Baymax-main/tests/test_toolkit_listen.py"
+    "Baymax-main/tests/test_toolkit_listen.py",
+    "Baymax-main/features/toolkits/offline_fall.py",
+    "Baymax-main/features/experimental/**"
   ],
   "python": [
     {

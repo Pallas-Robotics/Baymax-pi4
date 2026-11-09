@@ -179,7 +179,7 @@ class V10RuntimeTests(unittest.TestCase):
 
     def test_mvp_persona_toolkit_and_session_hooks_are_wired(self):
         source = self.source()
-        for hook in ("_BASE_SYSTEM_INSTRUCTION = persona.PERSONA",
+        for hook in ("_BASE_SYSTEM_INSTRUCTION = persona.instructions()",
                      "from features.toolkits import gemini_tools as public_toolkit",
                      "public_toolkit.prewarm()",
                      "fall_worker.submit(frame)",
@@ -563,6 +563,7 @@ class ReconnectTests(unittest.TestCase):
                 live=SimpleNamespace(connect=lambda **kw: Connect(kw["model"], kw["config"]))))),
             "API_KEY": "test", "_live_models": live_models.ModelChoice(["m"]), "_turn_done_at": 0.0,
             "_build_config": dict, "_boot_status": Mock(),
+            "audio_queue_mic": asyncio.Queue(), "_offline_fall": None,
             "_memory_embedder": None, "MEMORY_RETRIEVAL_ENABLED": False, "FALL_DETECTION_ENABLED": False,
             "FALL_ANGLE_THRESHOLD": 0, "FALL_STAY_DOWN_SECONDS": 0, "FALL_DETECTION_FPS": 0,
             "POSE_TRACKING_ENABLED": True, "RANDOM_INITIATION_ENABLED": False,
@@ -579,7 +580,7 @@ class ReconnectTests(unittest.TestCase):
         with patch("test_public_core_integration.CORE", V10):
             for name in ("_flush_playback", "_abandon_reply", "_send_cut_off_prompts", "_abort_connection",
                          "_SessionHandover", "_leaves", "_reconnect_plan", "_reselect_audio_devices",
-                         "_reset_audio", "run", *load):
+                         "_RestartAudio", "_reset_audio", "_run_gemini", *load):
                 load_function(name, namespace)
         self.pauses = []
 
@@ -589,7 +590,7 @@ class ReconnectTests(unittest.TestCase):
                 raise AssertionError("run() kept pausing without reaching the connections")
             await REAL_SLEEP(0.001)
         with patch("builtins.print"), patch("asyncio.sleep", pause), self.assertRaises(Stop):
-            asyncio.run(namespace["run"]())
+            asyncio.run(namespace["_run_gemini"]())
         return sessions, namespace
 
     async def cut_off_alert(self, index, session, namespace):
@@ -736,8 +737,16 @@ class ReconnectTests(unittest.TestCase):
 
         async def receive(index, session, namespace):
             raise PortAudioError("Error opening InputStream: Device unavailable")
-        sessions, ns = self.run_connections(1, receive, get_default_device_id=select)
-        self.assertEqual(self.pauses, [2, 5])        # awaited: a stop still ends Ember at once
+        ns = {"asyncio": asyncio, "sd": Mock(), "time": SimpleNamespace(sleep=Mock()),
+              "_reselect_audio_devices": lambda: (ns["sd"]._initialize(), setattr(ns["sd"].default, "device", list(select())), (3, 4))[-1]}
+        with patch("test_public_core_integration.CORE", V10):
+            reset = load_function("_reset_audio", ns)
+        self.pauses = []
+        async def pause(seconds):
+            self.pauses.append(seconds)
+        with patch("asyncio.sleep", pause):
+            asyncio.run(reset())
+        self.assertEqual(self.pauses, [5])        # awaited: a stop still ends Ember at once
         ns["time"].sleep.assert_not_called()
         ns["sd"]._terminate.assert_called_once()
         ns["sd"]._initialize.assert_called_once()
@@ -995,10 +1004,13 @@ class ReconnectTests(unittest.TestCase):
 
     def test_every_session_end_abandons_the_reply_and_drops_the_socket_before_leaving_connect(self):
         source = V10.read_text(encoding="utf-8")
-        run = source[source.index("async def run():"):source.index("def _boot_status")]
+        run = source[source.index("async def _run_gemini():"):source.index("def _boot_status")]
         cleanup = run[run.index("finally:"):]
         self.assertLess(cleanup.index("_abandon_reply()"), cleanup.index("_abort_connection(live_session)"))
-        self.assertLess(cleanup.index("_abort_connection(live_session)"), cleanup.index("output_stream.stop()"))
+        self.assertNotIn("output_stream.stop()", run)  # Reconnect must preserve local check-in audio.
+        lifetime = source[source.index("async def run():"):source.index("async def _run_gemini():")]
+        self.assertIn("output_stream.stop()", lifetime)
+        self.assertIn("output_stream.close()", lifetime)
 
     # ── Gemini Live model: the next one when this API key can't use one (live_models.py) ──
     def run_models(self, count, receive, **options):
@@ -1103,7 +1115,8 @@ class RealTimeThreadTests(unittest.TestCase):
               "_playback_lock": threading.Lock(), "_playback_buffer": b"", "_transcript_lock": threading.Lock(),
               "_transcript": [], "_transcript_saved": 0, "_mic_statuses": 0, "_mic_statuses_shown": 0}
         with patch("test_public_core_integration.CORE", V10):
-            for name in ("listen_audio", "monitor_queues"):
+            ns.update(_gemini_connected=True, _offline_fall=None)
+            for name in ("_queue_microphone", "listen_audio", "monitor_queues"):
                 load_function(name, ns)
 
         async def capture():
@@ -1154,7 +1167,8 @@ class RealTimeThreadTests(unittest.TestCase):
               "_playback_lock": threading.Lock(), "_playback_buffer": b"", "_transcript_lock": threading.Lock(),
               "_transcript": [], "_transcript_saved": 0}
         with patch("test_public_core_integration.CORE", V10):
-            for name in ("listen_audio", "monitor_queues"):
+            ns.update(_gemini_connected=True, _offline_fall=None)
+            for name in ("_queue_microphone", "listen_audio", "monitor_queues"):
                 load_function(name, ns)
 
         async def capture():
@@ -1388,15 +1402,19 @@ class LiveViewTests(unittest.TestCase):
         first = parts(2)
         self.assertEqual(len(drawn), 1)
         self.assertEqual(first[0], first[1])                     # re-sent, not re-drawn or re-encoded
-        time.sleep(0.3)
-        self.assertEqual(ns["_mjpeg_viewers"], 0)               # the viewer left
+        deadline = time.monotonic() + 5
+        while ns["_mjpeg_viewers"] and time.monotonic() < deadline:
+            time.sleep(0.02)
+        self.assertEqual(ns["_mjpeg_viewers"], 0)               # TCP close is asynchronous.
         # A new picture each frame while watched: the stream follows it.
         show(30)
         seen = parts(8, {3: lambda: show(200)})
         means = [int(cv2.imdecode(np.frombuffer(b, np.uint8), cv2.IMREAD_COLOR).mean()) for b in seen]
         self.assertLessEqual(abs(means[0] - 30), 2)
         self.assertLessEqual(abs(means[-1] - 200), 2)
-        time.sleep(0.3)
+        deadline = time.monotonic() + 5
+        while ns["_mjpeg_viewers"] and time.monotonic() < deadline:
+            time.sleep(0.02)
         self.assertEqual(ns["_mjpeg_viewers"], 0)
 
 
@@ -1723,7 +1741,12 @@ class PoseModelDownloadTests(unittest.TestCase):
         (root / "release").mkdir()
         self.shared = root / "shared" / "pose_landmarker_lite.task"
         self.path = root / "release" / "pose_landmarker_lite.task"
-        self.path.symlink_to(self.shared)                  # dangling until the first download
+        try:
+            self.path.symlink_to(self.shared)              # dangling until the first download
+        except OSError as error:
+            if os.name == 'nt' and getattr(error, 'winerror', None) == 1314:
+                self.skipTest('Windows account lacks symbolic-link privilege')
+            raise
 
     def ensure(self, retrieve):
         ns = {"os": os, "urllib": SimpleNamespace(request=SimpleNamespace(urlretrieve=retrieve)),

@@ -63,14 +63,14 @@ On a fresh device, stop any existing Ember runtime and standalone eye demo, then
 ```bash
 sudo apt update
 sudo apt install -y git
-git clone --branch release --single-branch https://github.com/Pallas-Robotics/Baymax.git ~/Baymax
+git clone --branch release --single-branch https://github.com/Pallas-Robotics/Baymax-pi4.git ~/Baymax
 cd ~/Baymax
 ```
 
 For an existing clean checkout of `release`, use `git pull --ff-only`.
 Preserve local robot edits and private configuration before updating; a pull on another branch does not select this release.
 An existing Orange Pi checkout of JoeKojima/Baymax switches with
-`git remote set-url origin https://github.com/Pallas-Robotics/Baymax.git` (keep
+`git remote set-url origin https://github.com/Pallas-Robotics/Baymax-pi4.git` (keep
 `.models/pose_npu`: the checked NPU models stay valid while rknn-toolkit-lite2 and
 librknnrt are unchanged).
 Run the commands below as the desktop user; the prerequisite script requests

@@ -1,5 +1,6 @@
 import asyncio
 import os
+from pathlib import Path
 import queue
 import threading
 import time
@@ -385,6 +386,7 @@ class AudioInputTests(unittest.TestCase):
         microphone = asyncio.Queue()
         samples = np.full((1024, 1), 1234, dtype=np.int16)
         enhancer = SimpleNamespace(reset=lambda: None, process=lambda values, timing=None: np.zeros_like(values))
+        local_checkin = Mock(busy=False)
         class Stream:
             latency = .02
             def __init__(self, **kwargs):
@@ -396,6 +398,8 @@ class AudioInputTests(unittest.TestCase):
         listen = load_function('listen_audio', {'asyncio': asyncio, 'np': np, 'queue': queue,
             'time': time, '_audio_enhancer': enhancer, '_waiting_cue': None, 'INPUT_CHANNELS': 1,
             '_audio_record_queue': raw_recording, 'audio_queue_mic': microphone,
+            '_queue_microphone': microphone.put_nowait,
+            '_offline_fall': local_checkin,
             'INTERRUPT_RMS_THRESHOLD': 1000, 'sd': SimpleNamespace(InputStream=Stream),
             'SEND_SAMPLE_RATE': 48000, 'CHUNK_SIZE': 1024})
         async def run():
@@ -406,3 +410,5 @@ class AudioInputTests(unittest.TestCase):
         asyncio.run(run())
         self.assertEqual(raw_recording.get_nowait(), samples.tobytes())
         self.assertEqual(microphone.get_nowait()['data'], bytes(2048))
+        if Path(listen.__code__.co_filename).name == "realtime_gemini_10.py":
+            np.testing.assert_array_equal(local_checkin.feed.call_args.args[0], np.zeros(1024, dtype=np.int16))

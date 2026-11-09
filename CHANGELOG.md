@@ -1,5 +1,7 @@
 # MVP (unreleased)
 
+- Reconcile the OPI4 line in Pallas-Robotics/Baymax-pi4 with the shared Pallas baseline and the remaining owner opt-in/offline-fall work. Preserve reconnect/timing/model fixes, close devices before PortAudio recovery, and keep the full language guidance behind its owner setting. New OPI4 image/update defaults use Baymax-pi4; existing cards and release pointers are not switched. See `docs/OPI4_RECONCILIATION.md`; OPI4 live validation remains pending.
+
 - Ember answers in the language the person speaks: Hindi gets Hindi, Spanish gets
   Spanish, a switch is followed on the next reply, a Hindi-English mix gets the same
   mix, and Ember's own English notes (`[FALL ALERT]`, reminders, check-ins) are
@@ -413,6 +415,32 @@
   verification checks the source repository, safe image filename, byte length
   and SHA256 before the operator uses a separate image writer. No physical disk
   is written by the builder or verifier; fresh-card hardware checks remain pending.
+
+- Document the authoritative contribution/release route and five owner modes.
+  Require protocol-first Graphify queries for LLM work and a source-freshness CI
+  gate. Add the public source map, PR template and rollout checklist; physical
+  evidence and release approval remain separate. Correct platform-specific test
+  assumptions and wait for asynchronous viewer cleanup in the CI regression test.
+
+- Establish NateyKim/Baymax as the Ember publishing authority. Add deploy,
+  needshardwaretest, needssimtest and needssoftwaretest channel branches, with
+  offline checks and image build checks on every channel push. Channel image
+  checks do not publish or promote container tags. New SD-image configuration
+  defaults to this repository and deploy; existing owner settings remain intact.
+
+- Add `features/experimental/` with software, chamber-simulation and physical
+  hardware stages. Language adaptation and offline fall check-ins are software
+  stage only; each defaults off and has its own owner opt-in in Setup. Record
+  the canonical repository and proposed four update channels in
+  `docs/UPDATE_CHANNELS.md`; Channel branches and CI triggers are published in NateyKim/Baymax;
+  branch-protection rules and fleet migration remain pending. Synthetic data injection on a Pi counts as software testing.
+
+- Add English offline fall check-ins in v10 with existing Vosk, local espeak-ng
+  prompts, explicit okay/fallen/help responses, repeated questions until an answer, and unresolved outcomes.
+  Audio streams survive Gemini reconnects; network-only preflight failures allow
+  configured fall monitoring to start offline. Local dependencies must be prepared
+  first. No external alerts or active-release deployment. Isolated Orange Pi 4 Pro software injection test passed with real Vosk, synthetic landmarks/speech and process-level network denial; physical audio/video validation remains pending.
+  See `Baymax-main/features/toolkits/OFFLINE_FALL.md`.
 
 - **Ember for Orange Pi: one repository for the Orange Pi 4 Pro and the Orange Pi 5
   Max.** Made from JoeKojima/Baymax PR #29 (`opi4-demo`), PR #22 (the SD-image builder),

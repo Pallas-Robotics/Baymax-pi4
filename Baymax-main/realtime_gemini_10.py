@@ -437,7 +437,7 @@ _HAZARD_TABLE = _build_hazard_table()
 # MVP (#15): Ember speaks with the MVP persona (features/persona.py), as it
 # did on v8. The toolkit and eye instructions are appended at session start
 # (gemini_tools.extend_config); stored memories are prepended in _build_config.
-_BASE_SYSTEM_INSTRUCTION = persona.PERSONA
+_BASE_SYSTEM_INSTRUCTION = persona.instructions()
 if MEMORY_RETRIEVAL_ENABLED:
     # The note comes between turns without turn_complete (between_turns): background for
     # the person's next words, not a message to answer.
@@ -558,7 +558,7 @@ OUTPUT_CHANNELS = 1 # Gemini returns mono
 CHUNK_SIZE = 960
 
 # ─── Queues & Buffers ─────────────────────────────────────────────────────────
-audio_queue_mic = asyncio.Queue()
+audio_queue_mic = asyncio.Queue(maxsize=100)
 
 # Thread-safe playback buffer for callback-based output stream
 _playback_buffer = b""
@@ -634,6 +634,8 @@ _latest_frame_lock = threading.Lock()
 _fall_detected_event = threading.Event()
 _fall_held_note = ""  # a fall alert to send again keeps its first try's note that playback paused
 _shutdown_event = threading.Event()
+_offline_fall = None
+_gemini_connected = False
 _stop_started_ts = 0.0  # time.monotonic() when the session was cancelled to stop
 
 # ─── Conversation-initiation shared state ────────────────────────────────────
@@ -854,6 +856,9 @@ _last_mic_send_ts: float = 0.0
 # ─── Playback buffer helpers ─────────────────────────────────────────────────
 def _append_playback(data: bytes, *, new_turn=False, timing_id=None):
     global _playback_buffer
+    local = globals().get("_offline_fall")
+    if local is not None and local.busy:
+        return
     first = None
     if timing_id is not None:
         # The reply's first sound, found before taking the lock the speaker waits for.
@@ -1003,7 +1008,13 @@ def _output_callback(outdata, frames, time_info, status):
     except Exception:
         monitor.timing.failed = True
         print("[AUDIO] Conversation timing turned off after an error; audio continues.", flush=True)
-    if _waiting_cue is not None:
+    local = globals().get("_offline_fall")
+    local_chunk = local.render(n_bytes) if local is not None else None
+    if local_chunk is not None:
+        chunk = local_chunk
+        if _waiting_cue is not None:
+            _waiting_cue.cancel()
+    if local_chunk is None and _waiting_cue is not None:
         if _audio_enhancer is not None and _audio_enhancer.full_duplex:
             chunk = _waiting_cue.render(chunk, n_bytes)
         else:
@@ -1738,6 +1749,9 @@ async def listen_audio():
         #     clean_mono = mono_data
         #     send_bytes = raw_bytes
         clean_mono = _audio_enhancer.process(mono_data, time_info) if _audio_enhancer is not None else mono_data
+        local = globals().get("_offline_fall")
+        if local is not None:
+            local.feed(clean_mono)
         send_bytes = clean_mono.tobytes()
         if _waiting_cue is not None:
             _waiting_cue.microphone(send_bytes, INTERRUPT_RMS_THRESHOLD)
@@ -1756,8 +1770,12 @@ async def listen_audio():
         # can stall the capture when the log is slow.
         _mic_level = (rms, peak)
 
+        # Check at capture time too: a delayed event-loop callback must never upload
+        # audio captured during the local check-in or an offline interval.
+        if not globals().get("_gemini_connected", True) or (local is not None and local.busy):
+            return
         loop.call_soon_threadsafe(
-            audio_queue_mic.put_nowait,
+            _queue_microphone,
             {
                 "data": send_bytes,
                 "mime_type": f"audio/pcm;rate={SEND_SAMPLE_RATE}",
@@ -1791,6 +1809,8 @@ async def send_audio_realtime(session):
                 break
 
         for msg in batch:
+            if globals().get("_offline_fall") is not None and _offline_fall.busy:
+                continue
             queue_wait_ms = (
                 time.perf_counter() - msg.get("ts", time.perf_counter())
             ) * 1000
@@ -1879,6 +1899,9 @@ async def fall_alert_monitor(session):
             None, _fall_detected_event.wait, 2.0
         )
         if not triggered:
+            continue
+        if globals().get("_offline_fall") is not None and _offline_fall.ready:
+            await asyncio.sleep(0.1)
             continue
         _fall_detected_event.clear()
         engagement.engage('possible fall')
@@ -2697,9 +2720,78 @@ def _run_voice_analysis():
 
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
+def _queue_microphone(message):
+    # Do not retain outage audio for upload after reconnect, or local check-in answers.
+    if not _gemini_connected or (_offline_fall is not None and _offline_fall.busy):
+        return
+    if audio_queue_mic.full():
+        audio_queue_mic.get_nowait()
+    audio_queue_mic.put_nowait(message)
+
+
+async def _local_fall_monitor():
+    while True:
+        if _offline_fall is not None and _offline_fall.ready:
+            _offline_fall.offline = not _gemini_connected
+            if _fall_detected_event.is_set():
+                _offline_fall.trigger(offline=not _gemini_connected)
+                _fall_detected_event.clear()
+            if fall_worker.pop_alert() is not None:
+                _offline_fall.trigger(offline=not _gemini_connected)
+        await asyncio.sleep(0.05)
+
+
+class _RestartAudio(Exception):
+    """Restart runtime-owned devices after a device/session failure."""
+
+
 async def run():
-    global _last_robot_speech_ts, _stop_started_ts, _go_away_at, _connected_at
-    monitor.start(lambda: {"playback_bytes": len(_playback_buffer), "gemini_generating_audio": _gemini_speaking, "audio_input": dict(_audio_enhancer.metrics) if _audio_enhancer is not None else None})
+    """Devices live for the runtime, independently of any Gemini connection."""
+    global _offline_fall, _stop_started_ts
+    from features.toolkits.offline_fall import Checkin, enabled
+    from features.toolkits import audiobooks
+    from features.conversational_ability.engage import engagement
+    def pause_for_checkin():
+        engagement.engage("possible fall")
+        audiobooks.hold_for_answer("possible fall")
+        _flush_playback()
+    if enabled() and (FALL_DETECTION_ENABLED or os.getenv("BAYMAX_FALL_DETECTION_ENABLED", "0") == "1"):
+        _offline_fall = Checkin(lambda message: monitor.record("fall_detection", message),
+                                pause_for_checkin)
+        _offline_fall.start()
+        fall_worker.local_checkin = _offline_fall
+    try:
+        while True:
+            output_stream = None
+            try:
+                try:
+                    output_stream = start_output_stream()
+                    async with asyncio.TaskGroup() as tasks:
+                        tasks.create_task(listen_audio())
+                        tasks.create_task(_local_fall_monitor())
+                        tasks.create_task(_run_gemini())
+                except* (_RestartAudio, sd.PortAudioError):
+                    pass  # All capture tasks stop before PortAudio is reset.
+            finally:
+                if output_stream is not None:
+                    output_stream.stop()
+                    output_stream.close()
+            await asyncio.sleep(2)
+            await _reset_audio()
+    except asyncio.CancelledError:
+        _stop_started_ts = time.monotonic()
+        _shutdown_event.set()
+        raise
+    finally:
+        if _offline_fall is not None:
+            _offline_fall.close()
+        fall_worker.local_checkin = None
+        _offline_fall = None
+
+
+async def _run_gemini():
+    global _last_robot_speech_ts, _stop_started_ts, _gemini_connected, _go_away_at, _connected_at
+    monitor.start(lambda: {"playback_bytes": len(_playback_buffer), "gemini_generating_audio": _gemini_speaking, "audio_input": dict(_audio_enhancer.metrics) if _audio_enhancer is not None else None, "offline_fall_checkin": _offline_fall.status() if _offline_fall is not None else None})
     public_toolkit.prewarm()
     client = genai.Client(
         api_key=API_KEY, http_options={"api_version": "v1alpha"}
@@ -2709,6 +2801,8 @@ async def run():
         started, set_up = time.monotonic(), False
         model = _live_models.current
         try:
+            while not audio_queue_mic.empty():
+                audio_queue_mic.get_nowait()
             monitor.finish_transcripts()
             monitor.emit("connecting", "Connecting to Gemini Live")
             print(f"Connecting to {model}...")
@@ -2745,12 +2839,11 @@ async def run():
                 # Start each session's idle window fresh from connection time.
                 with _initiation_ts_lock:
                     _last_robot_speech_ts = time.monotonic()
-                output_stream = start_output_stream()
+                _gemini_connected = True
 
                 try:
                     async with asyncio.TaskGroup() as tg:
                         tg.create_task(_send_cut_off_prompts(live_session))
-                        tg.create_task(listen_audio())
                         tg.create_task(send_audio_realtime(live_session))
                         tg.create_task(send_video_realtime(live_session))
                         tg.create_task(receive_audio(live_session))
@@ -2768,16 +2861,13 @@ async def run():
                     # KeyboardInterrupt, or CancelledError after a reconnect on
                     # Python 3.11/3.12: TaskGroup leaves this task's cancel count up.
                     if asyncio.current_task().cancelling():
-                        # Stopping: the stop's time limit runs from here, and
-                        # no new memory save starts.
-                        _stop_started_ts = time.monotonic()
-                        _shutdown_event.set()
+                        # The outer runtime distinguishes a real stop from a
+                        # device-recovery cancellation of this session task.
                         raise
                 finally:
+                    _gemini_connected = False
                     _abandon_reply()
                     _abort_connection(live_session)
-                    output_stream.stop()
-                    output_stream.close()
         except Exception as e:
             if not set_up and isinstance(e, OSError):
                 # DNS, network unreachable, refused, open timeout: this attempt never reached
@@ -2797,10 +2887,9 @@ async def run():
                 continue
             print(f"connection failed {reason}. retrying...")
             _boot_status("connecting", f"Connection failed: {reason}", error=True)
-            # Give ALSA/PipeWire time to release the device, then reset PortAudio
-            # to recover from ALSA/PipeWire device errors.
-            await asyncio.sleep(2)
-            await _reset_audio()
+            # Release both live streams before resetting PortAudio. Network failures
+            # handled above leave the devices and local check-ins running.
+            raise _RestartAudio() from e
 
 def _boot_status(stage: str, message: str, ready: bool = False, error: bool = False):
     _notify_webapp("/api/boot-status", {"stage": stage, "message": message, "ready": ready, "error": error})

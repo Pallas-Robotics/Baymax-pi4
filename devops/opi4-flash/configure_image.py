@@ -32,10 +32,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--settings', type=Path, default=Path(__file__).parent / 'settings.private.json')
     args = parser.parse_args()
-    old = load(args.settings) if args.settings.exists() else {'branch': 'release', 'wifi': {'ssid': '', 'password': ''}, 'gemini_api_key': ''}
+    old = load(args.settings) if args.settings.exists() else {'branch': 'deploy', 'wifi': {'ssid': '', 'password': ''}, 'gemini_api_key': ''}
     if 'pr' in old:
         print(f'These settings followed pull request #{old["pr"]}; images now follow a branch of {REPOSITORY}.')
-    current = old.get('branch', 'release')
+    current = old.get('branch', 'deploy')
     branch = input(f'Branch to follow [{current}]: ').strip() or current
     ssid = input(f'Wi-Fi name [{old["wifi"]["ssid"]}]: ').strip() or old['wifi']['ssid']
     password = getpass.getpass('Wi-Fi password (Enter keeps existing; - means open Wi-Fi): ')

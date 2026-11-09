@@ -14,7 +14,7 @@ needs verification; checksum success alone does not establish hardware support.
 On a Linux build host or Linux VM with root and loop-device support:
 
 ```bash
-git clone --branch main --single-branch https://github.com/Pallas-Robotics/Baymax.git
+git clone --branch main --single-branch https://github.com/Pallas-Robotics/Baymax-pi4.git
 cd Baymax
 python3 --version  # Python 3.12 or newer
 ```

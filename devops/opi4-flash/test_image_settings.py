@@ -45,9 +45,9 @@ class ImageSettingsTests(unittest.TestCase):
                 board = False
             self.assertEqual(valid_branch(branch), board, branch)
         self.assertEqual(device_config.DEFAULTS['repository'], REPOSITORY)
-        self.assertEqual(device_config.DEFAULTS['branch'], 'release')
+        self.assertEqual(device_config.DEFAULTS['branch'], 'deploy')
         self.assertIn(f"DEFAULT_REPOSITORY='{REPOSITORY}'", (HERE / 'payload/ember-update').read_text())
-        self.assertEqual(json.loads((HERE / 'settings.example.json').read_text())['branch'], 'release')
+        self.assertEqual(json.loads((HERE / 'settings.example.json').read_text())['branch'], 'deploy')
 
     def test_optional_access_password_is_validated(self):
         self.assertEqual(validate(self.settings | {'access_password': 'longenough'})['access_password'], 'longenough')

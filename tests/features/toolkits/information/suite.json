@@ -4,7 +4,9 @@
     "Baymax-main/features/toolkits/gemini_tools.py",
     "Baymax-main/features/toolkits/*.py",
     "Baymax-main/features/conversational_ability/live_models.py",
-    "Baymax-main/features/vision_process.py"
+    "Baymax-main/features/vision_process.py",
+    "Baymax-main/features/experimental/**",
+    "Baymax-main/tests/test_public_core_integration.py"
   ],
   "python": [
     {
@@ -13,7 +15,8 @@
         "test_toolkit.py",
         "test_toolkit_public.py",
         "test_toolkit_proactive.py",
-        "test_toolkit_look_closely.py"
+        "test_toolkit_look_closely.py",
+        "test_toolkit_offline_fall.py"
       ]
     }
   ]

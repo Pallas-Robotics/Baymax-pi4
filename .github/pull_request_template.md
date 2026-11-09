@@ -1,25 +1,22 @@
-## Change and reason
-Describe the behavior before/after and link the task. Update CHANGELOG.md.
+## Problem and resulting behavior
 
-## Core functionality
-- [ ] Ran `python check_release.py`; core offline section passed.
-- [ ] Completed live core checklist in Baymax-main/TESTING_PROTOCOL.md.
-- [ ] Recorded devices, OS, commit and runtime baseline tested.
+Describe the user-visible result and scope.
 
-## Additional toolkits
-- [ ] Toolkit offline section passed.
-- [ ] Added/updated relevant toolkit tests and README.
-- [ ] Completed normal, invalid/ambiguous, failure and timeout checks.
-- [ ] Checked integration with conversation/monitor and disabled behavior.
+## Validation and regression evidence
 
-For every unchecked or N/A item, explain why and what remains pending.
+- Source commit / board / OS / model / peripherals:
+- Core and toolkit command/results (include failures/skips):
+- Existing deploy behavior checked for regressions:
+- Chamber simulation evidence, or explicitly pending:
+- Physical hardware evidence, or explicitly pending:
+- Feature stage and owner opt-in/default behavior:
+- Data flows, dependencies, persisted-data compatibility and rollback:
 
-## Evidence and limitations
-Core results:
-Toolkit results (each changed toolkit):
-Tested platforms/devices:
-Pending checks, failures and justified exceptions:
+## Review
 
-## Lead review
-James/software lead reviews evidence and approves before merge/deployment.
-Offline success alone is not live validation or approval. Exclude secrets and private session data.
+- [ ] Followed `docs/WORKING_PROTOCOL.md` and Graphify entry-point query.
+- [ ] Updated documentation, CHANGELOG and protocol graph where affected.
+- [ ] No secrets, private sessions or recordings included.
+- [ ] Pending checks are explicit; no deployment approval is inferred from CI.
+
+Release promotion requires software-lead approval separately from this PR.
