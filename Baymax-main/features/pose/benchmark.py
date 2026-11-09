@@ -1,24 +1,7 @@
-"""Per-frame pose time on this machine: MediaPipe on the CPU vs the port on the NPU.
+"""Offline CPU pose comparison on supplied video or synthetic empty frames.
 
-    .venv/bin/python features/pose/benchmark.py [--frames 300] [--video clip.mp4] [--core 0]
-                                                [--fps 10] [--empty]
-
-Runs MediaPipe exactly as the camera thread does (same options, BGR->RGB, VIDEO mode)
-and the NPU backend (features/pose pipeline + RKNN) on the same frames, after the same
-fast-core pinning as the runtime, and prints milliseconds per frame (median/p90/p99),
-the process CPU time per frame (all threads, counted while each frame's detect() runs;
-CPU used between frames is not counted), the NPU time split into detector /
-landmark inference and CPU pre/post-processing, and how far the NPU landmarks are from
-MediaPipe's. Frames come from --video (a local file; nothing leaves the machine), the
-converter's sample image shifted a little each frame (tracking behaves as with a person
-in view) or, with --empty, an empty noisy room (nobody in view: the detector runs on
-every frame). Never opens a camera. ONNX Runtime is added when installed. The NPU part
-needs the converted models (convert_rknn.py).
-
-By default frames run back to back, which keeps the CPU and NPU clocked up: that is
-throughput. --fps 10 paces them like the camera thread (it sleeps to each frame's
-slot), so the clocks drop between frames as in Ember and each frame takes longer; this
-is what the Monitor's inference time shows, and the CPU share is per core at that rate.
+Never opens a camera or downloads an image. MediaPipe is the runtime default;
+ONNX is an optional CPU-only comparison when prepared model files exist.
 """
 import argparse
 import math
@@ -74,8 +57,7 @@ def frames_from(args, directory):
     else:
         image_path = directory / "build" / "pose.jpg"
         if not image_path.is_file():
-            from features.pose.convert_rknn import sample_image
-            image_path = sample_image(directory)
+            raise SystemExit("Provide --video, --empty, or a local sample.jpg in the CPU model directory.")
         image = cv2.imread(str(image_path))
         h, w = image.shape[:2]
         scale = 440 / h
@@ -135,23 +117,17 @@ def main(argv=None):
     parser.add_argument("--empty", action="store_true", help="nobody in view: the detector runs every frame")
     parser.add_argument("--fps", type=float, default=0,
                         help="pace frames like the camera thread (10 in Ember); default 0 = back to back")
-    parser.add_argument("--core", default=None, help="NPU core: 0, 1, 2, 0_1, 0_1_2 or auto (default BAYMAX_POSE_NPU_CORE or 0)")
     parser.add_argument("--task", default=str(ROOT / "pose_landmarker_full.task"))
-    parser.add_argument("--no-pin", action="store_true", help="don't pin to the fast cores like the runtime")
     args = parser.parse_args(argv)
 
     import os
     import platform
-    import pc_hardware
     from features.pose import models
     from features.pose.backend import MediaPipeCpuBackend, PipelineBackend, default_mediapipe_options
-    if not args.no_pin:
-        pc_hardware.use_performance_cpus()
-    import numpy as np            # after the pin, as in Ember: its thread pool starts on the fast cores
+    import numpy as np
     directory = models.model_dir()
     frames = frames_from(args, directory)
     print(f"{len(frames)} frames ({args.warmup} warm-up) on {platform.machine()} {platform.release()}, "
-          f"{'RK3588' if pc_hardware.is_rk3588() else 'not an RK3588'}, "
           f"{f'paced at {args.fps:g} fps' if args.fps > 0 else 'back to back'}", flush=True)
 
     results = {}
@@ -170,16 +146,6 @@ def main(argv=None):
     timed = {}
     if manifest is not None:
         try:
-            from features.pose.engines import RknnEngine
-            paths = models.verified_files(directory, manifest, "rknn")
-            core = args.core or os.environ.get("BAYMAX_POSE_NPU_CORE", "0")
-            timed["npu"] = Timed(RknnEngine(paths["pose_detector"], paths["pose_landmarks_detector"], core))
-            results[f"NPU (RK3588, core {core})"] = run(PipelineBackend(timed["npu"], "npu", "NPU"), frames,
-                                                        args.warmup, args.fps)
-            timed["npu"].close()
-        except Exception as error:
-            print(f"NPU skipped: {type(error).__name__}: {error}")
-        try:
             from features.pose.engines import OnnxEngine
             paths = models.verified_files(directory, manifest, "onnx")
             timed["onnx"] = Timed(OnnxEngine(paths["pose_detector"], paths["pose_landmarks_detector"]))
@@ -194,7 +160,7 @@ def main(argv=None):
     print()
     for name, (landmarks, ms, cpu) in results.items():
         summary(name, ms, sum(x is not None for x in landmarks), cpu, args.fps)
-    for key, label in (("npu", "NPU"), ("onnx", "ONNX Runtime")):
+    for key, label in (("onnx", "ONNX Runtime"),):
         if key in timed:
             t = timed[key].ms
             med = lambda values: float(np.median(values)) if values else float("nan")

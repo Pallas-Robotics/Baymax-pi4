@@ -266,31 +266,6 @@
       "_origin": "semantic"
     },
     {
-      "id": "readme_orange_pi_5_max",
-      "label": "Orange Pi 5 Max (RK3588)",
-      "file_type": "concept",
-      "source_file": "README.md",
-      "source_location": "Board comparison",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "_origin": "semantic"
-    },
-    {
-      "id": "baymax_main_orange_pi_setup_optional_rk3588_npu",
-      "label": "Optional checked RK3588 NPU pose",
-      "file_type": "concept",
-      "source_file": "Baymax-main/ORANGE_PI_SETUP.md",
-      "source_location": "Pose / optional NPU setup",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "The NPU backend is conditional on conversion and validation; its presence does not certify live fall accuracy.",
-      "_origin": "semantic"
-    },
-    {
       "id": "baymax_main_orange_pi_setup_mediapipe_cpu_pose",
       "label": "MediaPipe CPU pose fallback",
       "file_type": "concept",
@@ -654,19 +629,6 @@
       "_origin": "semantic"
     },
     {
-      "id": "baymax_main_features_pose_readme_rk3588_npu",
-      "label": "Conditional RK3588 NPU pose",
-      "file_type": "concept",
-      "source_file": "Baymax-main/features/pose/README.md",
-      "source_location": "Inputs, outputs, enabling",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "limitations": "Requires board conversion and accuracy check; heavy models stay on CPU.",
-      "_origin": "semantic"
-    },
-    {
       "id": "baymax_main_features_pose_readme_vision_child",
       "label": "Pose inference child process",
       "file_type": "concept",
@@ -690,19 +652,6 @@
       "author": null,
       "contributor": null,
       "limitations": "Historical in-process 15 fps/full-model measurements do not establish current child-process 10 fps performance.",
-      "_origin": "semantic"
-    },
-    {
-      "id": "baymax_main_features_toolkits_fall_detection_npu_fall_difference",
-      "label": "NPU and CPU fall decisions can differ",
-      "file_type": "concept",
-      "source_file": "Baymax-main/features/toolkits/FALL_DETECTION.md",
-      "source_location": "NPU backend (core pose)",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "limitations": "Documented NPU decisions differed from MediaPipe on two of thirteen detected events in the evaluated clips.",
       "_origin": "semantic"
     },
     {
@@ -1252,19 +1201,6 @@
       "author": null,
       "contributor": null,
       "rationale": "MediaPipe CPU pose; OPI4-Flash image applies only to this board.",
-      "_origin": "semantic"
-    },
-    {
-      "id": "docs_demo_devices_orange_pi_5_max",
-      "label": "Orange Pi 5 Max \u00e2\u20ac\u201d Rockchip RK3588",
-      "file_type": "concept",
-      "source_file": "docs/DEMO_DEVICES.md",
-      "source_location": "board comparison",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "Armbian/clickables installation; NPU is optional and requires conversion and an on-board check.",
       "_origin": "semantic"
     },
     {
@@ -2140,18 +2076,6 @@
       "rationale": "Summed RSS can double-count shared pages and is not PSS. System RAM includes other applications and the sampler."
     },
     {
-      "id": "devops_performance_readme_performance_npu",
-      "label": "Exposed NPU load and telemetry availability",
-      "file_type": "concept",
-      "source_file": "devops/performance/README.md",
-      "source_location": "Results and interpretation",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "Reads vendor percentage load files; unavailable is null, not zero. This does not prove NPU correctness or measure NPU memory."
-    },
-    {
       "id": "devops_performance_readme_performance_temperature",
       "label": "Hottest exposed thermal-zone temperature",
       "file_type": "concept",
@@ -2530,18 +2454,6 @@
       "rationale": "Simulation opens no microphone/camera/speaker and excludes robot address gate, echo cancellation, wake words and device playback; accents/noise/long conversations still need trials."
     },
     {
-      "id": "baymax_main_evals_languages_readme_multilingual_performance_protocol",
-      "label": "Use shared Pi CPU/RAM/NPU/temperature/added-latency protocol",
-      "file_type": "concept",
-      "source_file": "Baymax-main/evals/languages/README.md",
-      "source_location": "Review and compile the full list",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "The 15-second synthetic turn ceiling is an example, not a production response-latency budget."
-    },
-    {
       "id": "docs_features_feature_log_multilingual_feature_inventory",
       "label": "Multilingual simulations feature inventory",
       "file_type": "concept",
@@ -2753,42 +2665,6 @@
       "contributor": null
     },
     {
-      "id": "docs_features_opi4_language_results_opi_language_result_npu_load",
-      "label": "A733 NPU load 0.0% throughout the 30 s sample",
-      "file_type": "concept",
-      "source_file": "docs/features/OPI4_LANGUAGE_RESULTS.md",
-      "source_location": "Resource measurements",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "vipcore device/driver and viplite telemetry existed; driver inspection showed no allocations. Cloud conversation does not establish local NPU inference correctness."
-    },
-    {
-      "id": "docs_features_opi4_language_results_opi_language_result_npu_permissions",
-      "label": "NPU telemetry unavailable to normal user; existing sudo authorization used",
-      "file_type": "concept",
-      "source_file": "docs/features/OPI4_LANGUAGE_RESULTS.md",
-      "source_location": "Resource measurements",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "No profiling was enabled and no permissions changed to read the driver telemetry."
-    },
-    {
-      "id": "devops_performance_readme_opi_language_result_vendor_parser",
-      "label": "Sampler recognizes A733 viplite/core_loading and RK3588 rknpu load",
-      "file_type": "concept",
-      "source_file": "devops/performance/README.md",
-      "source_location": "Results and interpretation",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "Takes highest reported core percentage. Required unavailable metrics fail; do not change permissions/mount debugfs as a sampler side effect. Does not prove NPU correctness or measure its memory."
-    },
-    {
       "id": "docs_features_languages_opi_language_result_matrix_status",
       "label": "Full candidate matrix: text-mode evidence, no validated audio simulations",
       "file_type": "document",
@@ -2988,17 +2864,6 @@
     },
     {
       "source": "readme_document",
-      "target": "readme_orange_pi_5_max",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": "Introduction / Board comparison",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "readme_document",
       "target": "readme_opi4_flash_image",
       "relation": "references",
       "confidence": "EXTRACTED",
@@ -3011,17 +2876,6 @@
     {
       "source": "changelog_document",
       "target": "changelog_isolated_vision_process",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CHANGELOG.md",
-      "source_location": "Ember for Orange Pi",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "changelog_document",
-      "target": "baymax_main_orange_pi_setup_optional_rk3588_npu",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -3076,17 +2930,6 @@
     },
     {
       "source": "baymax_main_mvp_document",
-      "target": "readme_orange_pi_5_max",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/MVP.md",
-      "source_location": "Introduction / Install and configure",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "baymax_main_mvp_document",
       "target": "readme_opi4_flash_image",
       "relation": "references",
       "confidence": "EXTRACTED",
@@ -3099,28 +2942,6 @@
     {
       "source": "baymax_main_orange_pi_setup_document",
       "target": "readme_orange_pi_4_pro",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/ORANGE_PI_SETUP.md",
-      "source_location": "Board comparison / optional NPU setup",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "baymax_main_orange_pi_setup_document",
-      "target": "readme_orange_pi_5_max",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/ORANGE_PI_SETUP.md",
-      "source_location": "Board comparison / optional NPU setup",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "baymax_main_orange_pi_setup_document",
-      "target": "baymax_main_orange_pi_setup_optional_rk3588_npu",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -3361,17 +3182,6 @@
       "_origin": "semantic"
     },
     {
-      "source": "readme_ember_for_orange_pi",
-      "target": "readme_orange_pi_5_max",
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": "Board comparison",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
       "source": "readme_orange_pi_4_pro",
       "target": "baymax_main_orange_pi_setup_mediapipe_cpu_pose",
       "relation": "references",
@@ -3390,28 +3200,6 @@
       "confidence_score": 1.0,
       "source_file": "README.md",
       "source_location": "Orange Pi 4 Pro SD image",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "readme_orange_pi_5_max",
-      "target": "baymax_main_orange_pi_setup_optional_rk3588_npu",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/ORANGE_PI_SETUP.md",
-      "source_location": "Optional NPU setup",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "readme_orange_pi_5_max",
-      "target": "baymax_main_orange_pi_setup_mediapipe_cpu_pose",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/ORANGE_PI_SETUP.md",
-      "source_location": "Board comparison",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -3758,17 +3546,6 @@
     },
     {
       "source": "baymax_main_features_pose_readme_pose",
-      "target": "baymax_main_features_pose_readme_rk3588_npu",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/pose/README.md",
-      "source_location": "Inputs, outputs, enabling",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "baymax_main_features_pose_readme_pose",
       "target": "baymax_main_features_pose_readme_vision_child",
       "relation": "references",
       "confidence": "EXTRACTED",
@@ -3786,39 +3563,6 @@
       "confidence_score": 1.0,
       "source_file": "Baymax-main/features/pose/README.md",
       "source_location": "Inputs, outputs, enabling",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "baymax_main_features_pose_readme_vision_child",
-      "target": "baymax_main_features_pose_readme_rk3588_npu",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/pose/README.md",
-      "source_location": "Inputs, outputs, enabling",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "baymax_main_features_pose_readme_rk3588_npu",
-      "target": "baymax_main_features_pose_readme_cpu_mediapipe",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/pose/README.md",
-      "source_location": "Inputs, outputs, enabling",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "baymax_main_features_pose_validation_pose_validation",
-      "target": "baymax_main_features_toolkits_fall_detection_npu_fall_difference",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/pose/VALIDATION.md",
-      "source_location": "Pose port validation",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -4056,17 +3800,6 @@
     {
       "source": "baymax_main_features_toolkits_fall_detection_fall_toolkit",
       "target": "baymax_main_features_toolkits_fall_detection_fall_validation",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/features/toolkits/FALL_DETECTION.md",
-      "source_location": "Inputs, outputs and processing",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "baymax_main_features_toolkits_fall_detection_fall_toolkit",
-      "target": "baymax_main_features_toolkits_fall_detection_npu_fall_difference",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -4353,28 +4086,6 @@
     {
       "source": "docs_features_feature_log_document",
       "target": "docs_demo_devices_orange_pi_4_pro",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/features/FEATURE_LOG.md",
-      "source_location": "Board support and evidence",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "docs_demo_devices_document",
-      "target": "docs_demo_devices_orange_pi_5_max",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/DEMO_DEVICES.md",
-      "source_location": "board comparison",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "docs_features_feature_log_document",
-      "target": "docs_demo_devices_orange_pi_5_max",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -4765,17 +4476,6 @@
       "confidence_score": 1.0,
       "source_file": "docs/features/FEATURE_LOG.md",
       "source_location": "Board support and evidence / Core features",
-      "weight": 1.0,
-      "_origin": "semantic"
-    },
-    {
-      "source": "docs_demo_devices_orange_pi_5_max",
-      "target": "docs_features_feature_log_hardware_pending",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/features/FEATURE_LOG.md",
-      "source_location": "Board support and evidence",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -5556,16 +5256,6 @@
     },
     {
       "source": "devops_performance_readme_performance_sampler",
-      "target": "devops_performance_readme_performance_npu",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "devops/performance/README.md",
-      "source_location": "Feature performance check / Results and interpretation",
-      "weight": 1.0
-    },
-    {
-      "source": "devops_performance_readme_performance_sampler",
       "target": "devops_performance_readme_performance_temperature",
       "relation": "references",
       "confidence": "EXTRACTED",
@@ -5667,16 +5357,6 @@
     {
       "source": "devops_performance_readme_performance_sampler",
       "target": "devops_performance_readme_performance_missing_measurements",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "devops/performance/README.md",
-      "source_location": "Results and interpretation",
-      "weight": 1.0
-    },
-    {
-      "source": "devops_performance_readme_performance_missing_measurements",
-      "target": "devops_performance_readme_performance_npu",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -6055,16 +5735,6 @@
       "weight": 1.0
     },
     {
-      "source": "baymax_main_evals_languages_readme_multilingual_guide",
-      "target": "baymax_main_evals_languages_readme_multilingual_performance_protocol",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Baymax-main/evals/languages/README.md",
-      "source_location": "Review and compile the full list",
-      "weight": 1.0
-    },
-    {
       "source": "baymax_main_evals_languages_readme_multilingual_text_only",
       "target": "baymax_main_evals_languages_readme_multilingual_physical_pi_limits",
       "relation": "references",
@@ -6365,36 +6035,6 @@
       "weight": 1.0
     },
     {
-      "source": "docs_features_opi4_language_results_opi_language_result_resource_design",
-      "target": "docs_features_opi4_language_results_opi_language_result_npu_load",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/features/OPI4_LANGUAGE_RESULTS.md",
-      "source_location": "Resource measurements",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_features_opi4_language_results_opi_language_result_npu_load",
-      "target": "docs_features_opi4_language_results_opi_language_result_npu_permissions",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/features/OPI4_LANGUAGE_RESULTS.md",
-      "source_location": "Resource measurements",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_features_opi4_language_results_opi_language_result_npu_load",
-      "target": "devops_performance_readme_opi_language_result_vendor_parser",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/features/OPI4_LANGUAGE_RESULTS.md",
-      "source_location": "Resource measurements",
-      "weight": 1.0
-    },
-    {
       "source": "docs_features_opi4_language_results_opi_language_result_speech_pilots",
       "target": "docs_features_opi4_language_results_opi_language_result_pending_validation",
       "relation": "references",
@@ -6437,16 +6077,6 @@
     {
       "source": "docs_features_opi4_language_results_opi_language_result_offline_checks",
       "target": "docs_features_opi4_language_results_opi_language_result_punctuation_gate",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/features/OPI4_LANGUAGE_RESULTS.md",
-      "source_location": "Validation limits and artifacts",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_features_opi4_language_results_opi_language_result_offline_checks",
-      "target": "devops_performance_readme_opi_language_result_vendor_parser",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,

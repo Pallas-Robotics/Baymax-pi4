@@ -1,32 +1,8 @@
-"""Run a camera model (pose or face landmarks) in its own process.
+"""Bounded camera inference in a child process, using the OS scheduler.
 
-In Ember's main process MediaPipe inference held Python's GIL, so the microphone
-callback and the Gemini connection waited behind every frame: mic overflows and
-replies up to a minute late on the Orange Pi. A child process has its own GIL and
-cores. Only frames go in and plain landmark tuples come back over its pipes.
-
-The core camera thread's pose child runs features.pose.backend.ChildPose: on an
-Orange Pi 5 (RK3588) that passed the NPU check it drives the NPU (RKNN) from here,
-else MediaPipe on the CPU. A crash in the NPU runtime ends this child, not Ember.
-Where Ember runs on the RK3588's fast cores, the child places itself before it builds
-its model (pc_hardware.place_vision_child): pose stays on the fast cores at nice 5,
-face landmarks go to the slow cores at nice 10.
-
-    model = Remote(FaceLandmarks)      # any picklable factory with .detect(frame)
-    landmarks = model.detect(frame)    # list[Point] or None, as the local model
-    model.device                       # the model's .device after its last frame
-                                       # ("NPU"/"CPU"), or None if it has none
-
-A child that hangs without exiting (e.g. librknnrt stuck in the NPU driver) is killed
-once a frame has waited Remote.timeout (5 s), or the model's start Remote.start_timeout
-(60 s); that call raises RuntimeError like a child that died, so the camera thread
-restarts pose once on the CPU instead of waiting forever. A frame in which the model
-loads another one (pose switching from the NPU to MediaPipe after an NPU error) calls
-loading_model() first and gets the start's 60 s from then on, so a child that is
-recovering is not stopped as hung. One watchdog thread per child checks twice a
-second; a frame only stores its deadline (no timer thread per frame).
-
-Run as `python -m features.vision_process`; Remote starts it, nothing else should.
+Only frames go in and plain landmarks come back. A hung model is stopped by
+the watchdog; callers may restart CPU pose without blocking camera delivery.
+The loading_model signal gives an explicitly selected CPU backend time to load.
 """
 import collections
 import os
@@ -53,8 +29,8 @@ _send = None   # in a vision child: main()'s reply, for loading_model()
 
 def loading_model():
     """Called by a model in a vision child just before it loads another model during a
-    frame (features.pose.backend.FallbackBackend switching from the NPU to MediaPipe:
-    the NPU child never imported MediaPipe, which can take seconds on the board). Remote
+    frame (features.pose.backend.FallbackBackend switching from ONNX to MediaPipe:
+    the ONNX child never imported MediaPipe, which can take seconds on the board). Remote
     then gives that call the start's limit (start_timeout) instead of a frame's, so the
     watchdog does not stop a child that is recovering. Does nothing anywhere else
     (benchmark.py, validate.py and tests run backends in their own process)."""
@@ -75,8 +51,8 @@ class Remote:
     A call still waiting for its reply after `timeout` seconds (`start_timeout` while the
     model loads, also when it says so mid-frame: loading_model) kills the child and raises
     Stopped (a RuntimeError), as if the child had died."""
-    timeout = 5.0          # per frame; a 5 Max pose frame took 16-44 ms (NPU / MediaPipe medians)
-    start_timeout = 60.0   # imports and model load (NPU setup and warm-up measured 0.6-1.7 s), at
+    timeout = 5.0          # per frame; bounded per-frame inference wait
+    start_timeout = 60.0   # imports and CPU model loading, at
                            # the start or mid-frame (loading_model); callers download models
                            # before starting the child
     tick = 0.5             # how often the watchdog looks
@@ -171,26 +147,13 @@ class Remote:
         self.close()
 
 
-def _place(factory):
-    """This child's cores and priority, set before the model starts any thread (they inherit
-    both): pc_hardware.place_vision_child, which changes nothing unless Ember runs on the fast
-    cores. A model class with vision_role = "face" (FaceLandmarks) is placed as face
-    landmarks, anything else as pose. Placement only saves time: an error never stops the model."""
-    role = "face" if getattr(getattr(factory, "func", factory), "vision_role", None) == "face" else "pose"
-    try:
-        import pc_hardware
-        if pc_hardware.place_vision_child(role):
-            import cv2
-            cv2.setNumThreads(1)  # one colour conversion or crop a frame: no OpenCV pool spinning beside it
-    except Exception as error:
-        print(f"[VISION] Core placement skipped ({type(error).__name__}: {error})", flush=True)
 
 
 def main():
     global _send
     requests = sys.stdin.buffer
     # Replies get their own copy of the pipe; descriptor 1 then points at stderr, so
-    # native libraries writing to C stdout (e.g. librknnrt's "I RKNN: ..." lines) and
+    # native libraries writing to C stdout and
     # Python prints go to Ember's log instead of corrupting the reply pipe.
     replies = os.fdopen(os.dup(sys.stdout.fileno()), "wb")
     try:
@@ -206,7 +169,6 @@ def main():
 
     try:
         factory = pickle.load(requests)
-        _place(factory)  # first: the model's threads inherit the cores and the nice value
         model = factory()
     except Exception as error:
         reply("error", f"{type(error).__name__}: {error}")
@@ -220,14 +182,14 @@ def main():
                 return
             try:
                 landmarks = points(model.detect(frame))
-                # Read after detect: an NPU failure switches to the CPU inside it.
+                # Read after detect: an explicit ONNX CPU backend may fall back to MediaPipe.
                 reply("ok", (landmarks, getattr(model, "device", None)))
             except Exception as error:
                 reply("error", f"{type(error).__name__}: {error}")
     finally:
         try:
             if hasattr(model, "close"):
-                model.close()  # e.g. release the NPU (RKNN) cleanly
+                model.close()  # release the model cleanly
         except Exception:
             pass
 

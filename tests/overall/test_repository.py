@@ -11,8 +11,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[2]
 # Folders whose Python files are not the repository's own: hidden folders (.venv, .models,
 # .local-review, a bootstrap's .venv.previous-*), virtual environments and installed packages.
-# The robots run this check before each update: the Orange Pi 5 Max keeps its NPU converter
-# venvs (TensorFlow, torch, rknn-toolkit2: about 10,000 files) in Baymax-main/.models.
+# Update gates parse owned source, excluding cached models and third-party environments.
 SKIPPED_FOLDERS = {'venv', '__pycache__', 'site-packages', 'node_modules'}
 
 
@@ -35,7 +34,7 @@ class RepositoryChecks(unittest.TestCase):
 
     def test_local_folders_and_installed_packages_are_not_parsed(self):
         # A Python 2 file in a third-party package there failed the robot's gate, so the
-        # update rolled back (and the 5 Max never retries that commit).
+        # update rolled back (and the updater never retries that commit).
         broken = 'print "Python 2 only"\n'
         local = ['Baymax-main/.models/pose_npu/build/venv-onnx/lib/python3.12/site-packages/legacy/__init__.py',
                  'Baymax-main/.venv.previous-20261107-101500/lib/python3.11/site-packages/old.py',

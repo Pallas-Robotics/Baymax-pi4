@@ -175,8 +175,8 @@ serial port must be configured/verified separately. v10's built-in pose/fall
 settings come from `/etc/ember/device.toml`; its optional fall toolkit is a separate
 setting (it reuses the built-in pose but is a second detector) and should not be
 mistaken for that built-in detector. Pose runs on the CPU here (this board has no NPU
-that Ember uses) in its own process, and Ember is not pinned to the fast cores
-(`BAYMAX_CPU_PINNING=auto`; see ORANGE_PI_SETUP.md).
+that Ember uses) in its own process, with the OS scheduler and baseline audio defaults.
+No board-specific affinity/GIL policy is present; see ORANGE_PI_SETUP.md.
 
 ## Wipe, reflash and test a fresh card
 

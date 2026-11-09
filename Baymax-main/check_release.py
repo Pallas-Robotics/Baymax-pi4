@@ -19,7 +19,7 @@ LOCAL_SETTING_NAMES = {"GOOGLE_API_KEY", "GEMINI_API_KEY", "OPENAI_API_KEY", "FL
 TEST_INPUT_NAMES = {"BAYMAX_MEMORY_MODEL_DIR"}
 # Checks of the repository's own bookkeeping (every test file listed in one suite.json,
 # the suites --changed picks). The robots run this gate before taking a release and
-# roll back (the 5 Max never retries that commit), so a forgotten suite.json entry
+# roll back (the updater never retries that commit), so a forgotten suite.json entry
 # would stop every robot updating. They run in CI (GitHub sets GITHUB_ACTIONS=true)
 # and in tests/run.py, never on a robot.
 CI_ONLY_CHECKS = {"test_validation.py"}
@@ -67,7 +67,7 @@ Do not paste API keys, private transcripts or recordings into a public PR.
 @contextlib.contextmanager
 def local_settings_ignored(root=ROOT):
     """The checks test the shipped defaults, so they give the same result on every
-    machine. The Orange Pi 5 Max's updater runs them before each start, in the folder
+    machine. The robot updater runs them before each start, in the folder
     that holds the robot's .env: a documented setting there (BAYMAX_VOICE_VOLUME_TOOL=0,
     a check-in window) failed tests written for the defaults once a module (baymax_cloud)
     had loaded that .env on import, and every release was rolled back.

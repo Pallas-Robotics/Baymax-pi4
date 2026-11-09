@@ -141,8 +141,7 @@ def ensure_model(path=MODEL_PATH, fetch=None):
 
 
 class FaceLandmarks:
-    # features/vision_process.py places this child as face landmarks: where Ember runs on the
-    # RK3588's fast cores, on the slow ones at nice 10 (a greeting waits 0.8 s for a look anyway).
+    # CPU vision child; this fork applies no board-specific placement policy.
     vision_role = "face"
 
     def __init__(self):
@@ -244,7 +243,7 @@ class Proactive:
         self.wanted = False        # New eye contact waiting to be delivered to Gemini.
         self.state = "Disabled"
 
-    # ── Camera thread: keep only the newest frame ─────────────────────────────
+    # â”€â”€ Camera thread: keep only the newest frame â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     def observe(self, frame):
         if not presence_enabled():
             return
@@ -321,7 +320,7 @@ class Proactive:
     def allowed(self):
         return self.blocked() is None
 
-    # ── Event loop: one task per live session ────────────────────────────────
+    # â”€â”€ Event loop: one task per live session â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     async def session_task(self, session, shutdown_event):
         if startup_enabled() and not self.greeted_startup and self.startup_attempts < 2:
             # Once per run. A session that drops right after connecting cancels this

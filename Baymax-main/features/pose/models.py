@@ -1,14 +1,4 @@
-"""Where the converted pose models live and how they are checked.
-
-The converter (convert_rknn.py) writes, into the model directory:
-
-    pose_detector.onnx, pose_landmarks_detector.onnx     derived from the .task's TFLite
-    pose_detector.rknn, pose_landmarks_detector.rknn     FP16, target rk3588
-    manifest.json                                        versions, SHA-256s, accuracy check
-
-The directory defaults to Baymax-main/.models/pose_npu (ignored by Git and kept by
-the updater's checkout); BAYMAX_POSE_MODEL_DIR overrides it. Standard library only.
-"""
+"""Checksummed CPU ONNX pose models for optional offline comparison tools."""
 import hashlib
 import json
 import os
@@ -16,7 +6,7 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]          # Baymax-main
-DEFAULT_DIR = ROOT / ".models" / "pose_npu"
+DEFAULT_DIR = ROOT / ".models" / "pose_cpu"
 MANIFEST = "manifest.json"
 MANIFEST_FORMAT = 1
 NAMES = ("pose_detector", "pose_landmarks_detector")
@@ -57,7 +47,7 @@ def load_manifest(directory):
     try:
         manifest = json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
-        raise ModelError(f"no converted models in {directory} (run features/pose/convert_rknn.py on the board)") from None
+        raise ModelError(f"no converted models in {directory} (provide a checksummed CPU ONNX model manifest)") from None
     except (OSError, ValueError) as error:
         raise ModelError(f"unreadable {path}: {error}") from None
     if not isinstance(manifest, dict) or manifest.get("format") != MANIFEST_FORMAT:
@@ -74,7 +64,7 @@ def write_manifest(directory, manifest):
 
 
 def verified_files(directory, manifest, kind):
-    """Paths of the 'rknn' or 'onnx' models whose SHA-256 matches the manifest. Any
+    """Paths of the CPU ONNX models whose SHA-256 matches the manifest. Any
     problem (missing, changed, unreadable, malformed manifest) is a ModelError."""
     entries = manifest.get(kind) if isinstance(manifest, dict) else None
     if not isinstance(entries, dict):

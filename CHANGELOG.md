@@ -1,5 +1,7 @@
 # MVP (unreleased)
 
+- Keep Baymax-pi4 OPI4-only: remove inherited/imported RKNN selection, dependency and converter, board-specific affinity/GIL/child scheduling, automatic OPI5 speaker profiles and vendor telemetry probes. CPU pose and shared runtime fixes remain; replace accelerator tests with CPU-only/stale-setting checks. Platform guides now describe OPI4 rather than dual-board setup. Target hardware validation remains pending.
+
 - Reconcile the OPI4 line in Pallas-Robotics/Baymax-pi4 with the shared Pallas baseline and the remaining owner opt-in/offline-fall work. Preserve reconnect/timing/model fixes, close devices before PortAudio recovery, and keep the full language guidance behind its owner setting. New OPI4 image/update defaults use Baymax-pi4; existing cards and release pointers are not switched. See `docs/OPI4_RECONCILIATION.md`; OPI4 live validation remains pending.
 
 - Ember answers in the language the person speaks: Hindi gets Hindi, Spanish gets

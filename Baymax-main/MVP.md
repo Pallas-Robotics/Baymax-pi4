@@ -5,12 +5,11 @@ feature folders), and #12 (Conversational Ability). `run_mvp.py` starts their
 shared runtime, `realtime_gemini_10.py`, through the existing key/model preflight
 in `run_pc.py`. (The original MVP, PR #15, ran v8; this copy runs v10, which adds
 fall detection, robot-started conversations and `device.toml` settings.)
-Targets: the Orange Pi 4 Pro (64-bit DietPi/Debian 13) and the Orange Pi 5 Max
-(Armbian Debian 13), ARM64/aarch64, with working audio, camera and serial permissions.
+Target: Orange Pi 4 Pro (64-bit DietPi/Debian 13), ARM64/aarch64, with working audio, camera and serial permissions.
 Use a desktop session for the supplied Setup/Monitor workflow.
 Actual target-device validation is pending. See
 [the boards and what differs](../docs/DEMO_DEVICES.md) and
-[Orange Pi setup](ORANGE_PI_SETUP.md) (pose, pinning, memory, the optional NPU).
+[Orange Pi setup](ORANGE_PI_SETUP.md) (CPU pose, memory and device setup).
 
 ## Included features
 
@@ -52,8 +51,7 @@ audio/video while engaged.
 - **Orange Pi 4 Pro:** the simplest path is a personalized SD image from
   [OPI4-Flash](../devops/opi4-flash/README.md), which installs everything below and
   updates itself from the `release` branch. The steps below also work on Debian 13.
-- **Orange Pi 5 Max:** follow [ORANGE_PI_SETUP.md](ORANGE_PI_SETUP.md) (the same
-  steps through the clickables, plus the optional NPU setup).
+
 
 Use a complete checkout of this repository's `release` branch (or an extracted ZIP),
 with `Baymax-main/` and `devops/` together. From the project root:
@@ -71,8 +69,7 @@ For an existing clean checkout of `release`, use `git pull --ff-only`.
 Preserve local robot edits and private configuration before updating; a pull on another branch does not select this release.
 An existing Orange Pi checkout of JoeKojima/Baymax switches with
 `git remote set-url origin https://github.com/Pallas-Robotics/Baymax-pi4.git` (keep
-`.models/pose_npu`: the checked NPU models stay valid while rknn-toolkit-lite2 and
-librknnrt are unchanged).
+`.models/pose_cpu`: optional prepared CPU model assets).
 Run the commands below as the desktop user; the prerequisite script requests
 administrator access for system packages. Do not run Ember itself with sudo.
 

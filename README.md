@@ -1,58 +1,32 @@
-# Ember for Orange Pi
+# Ember for Orange Pi 4 Pro
 
-Start with the [working protocol](docs/WORKING_PROTOCOL.md) and [OPI4 reconciliation](docs/OPI4_RECONCILIATION.md). This repository is the OPI4 destination; active OPI5 branches remain in [Pallas-Robotics/Baymax](https://github.com/Pallas-Robotics/Baymax).
+This fork is specifically for **Orange Pi 4 Pro (Allwinner A733)**. Its starting
+revision is `551f80a`; the reconciliation adds selected shared runtime fixes and
+our OPI4 features. OPI5 development belongs in
+[Pallas-Robotics/Baymax](https://github.com/Pallas-Robotics/Baymax).
 
-Ember is a voice companion with Gemini conversation, optional eyes and camera,
-CPU/NPU pose processing, memories and callable information/support tools.
+The active OPI4 platform path uses CPU pose processing and the OS scheduler.
+There is no Rockchip runtime dependency, RKNN converter, NPU selection, CPU-affinity
+policy, GIL tuning or automatic board-specific speaker profile here. The original
+histories remain archived; they are not the active platform configuration.
 
-**OPi4 V1 is merged; its combined live checks are pending.** Offline checks do not
-establish perfect operation on every Orange Pi. See the
-[feature log](docs/features/FEATURE_LOG.md) for implemented features, source
-locations, tests and hardware checks still pending.
-
-## Board comparison
-
-| Board | Installation | Pose processing | Validation limits |
-|---|---|---|---|
-| Orange Pi 4 Pro (A733) | DietPi SD image or documented Debian setup | MediaPipe CPU, isolated child process | ARM64/offline checks passed; combined V1 live/fresh-card checks pending |
-| Orange Pi 5 Max (RK3588) | Board-specific Armbian/clickables setup | CPU fallback; optional NPU after conversion/checks | Combined V1 hardware checks remain necessary |
-| Other boards | Not established by this PR | Board-specific | No blanket support claim |
-
-One codebase and one dependency file serve both boards; what differs is decided
-on the board at runtime (the NPU, fast-core pinning) or by how it is set up:
-
-| | Orange Pi 4 Pro | Orange Pi 5 Max |
-|---|---|---|
-| OS | DietPi (Debian 13) SD image from [OPI4-Flash](devops/opi4-flash/README.md), or Debian 13 | Armbian Debian 13 with the vendor 6.1 kernel (needed only for the NPU) |
-| Fast-core pinning (`BAYMAX_CPU_PINNING=auto`, the default) | off (unmeasured; `on` tries the two A76s) | on: Ember stays on the RK3588's four Cortex-A76 cores, cpu4-7 (measured); where its pose and face processes run: [ORANGE_PI_SETUP.md, Fast cores](Baymax-main/ORANGE_PI_SETUP.md#fast-cores) |
-| Updates | the image's `ember-update`, following a branch (default `release`) | opt-in: `devops/mvp/update.py` before each start of the autostart service (needs the git checkout, `install_autostart.py` and `BAYMAX_AUTO_UPDATE=1`; `BAYMAX_UPDATE_BRANCH`, default `release`); otherwise `git pull` by hand |
-
-Where this came from: JoeKojima/Baymax PR #29 (`opi4-demo`, the Orange Pi 4 Pro
-demo), PR #22 (`codex/opi4-flash`, the SD-image builder), the Orange Pi 5 Max
-branches `orangepi5-npu` and `memory-incremental-saves`, `orangepi-features`
-(opi4-demo with Svanik's PRs #23-#28 and #30 and the voice volume control) and the
-reconnect fix from `reconnect-any-disconnect`, merged in November 2026. This
-repository deliberately diverges from Baymax's `startup-greeting` (LattePanda)
-branch: shared fixes are ported by hand. The x86/LattePanda, macOS, Windows and
-Docker code is still in the tree but is not what this repository targets.
-
-Start with the [board installation guide](Baymax-main/ORANGE_PI_SETUP.md) and
-[device comparison](docs/DEMO_DEVICES.md). Use a suitable power supply, USB
-microphone/speaker, and an optional supported camera. Eyes need their own verified
-serial wiring/configuration.
+Start with the [working protocol](docs/WORKING_PROTOCOL.md),
+[OPI4 setup](Baymax-main/ORANGE_PI_SETUP.md) and
+[reconciliation decisions](docs/OPI4_RECONCILIATION.md). This is a draft candidate;
+software checks do not establish actual OPI4 operation or release approval.
 
 ## Get and start the application
 
 ```bash
 git clone https://github.com/Pallas-Robotics/Baymax-pi4.git
-cd Baymax
+cd Baymax-pi4
 ```
 
 For development, use `main` and a feature branch. V1, reviewed on
 `opi4-chat-timing`, is merged into `main`. The normal on-board update channel is
 `release`.
 Complete the board guide's system packages, Python environment, device selection
-and Gemini-key setup first. Both boards use
+and Gemini-key setup first. OPI4 uses
 `Baymax-main/requirements-orange-pi.txt`.
 
 The device entry point is `Baymax-main/run_mvp.py`, which wraps v10 startup,

@@ -38,8 +38,7 @@ indices = [0, 1, 2]
 # starts a conversation on its own.
 pose_tracking = true
 # MediaPipe pose model on the CPU: "lite" (least CPU, default), "full" or "heavy".
-# An Orange Pi 5 / 5 Max with the NPU set up (ORANGE_PI_SETUP.md) runs the checked
-# full model on the NPU for "lite" and "full"; "heavy" always stays on the CPU.
+# OPI4 pose runs the selected MediaPipe model on the CPU.
 pose_model = "lite"
 
 [network]

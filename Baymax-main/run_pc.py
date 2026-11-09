@@ -17,9 +17,7 @@ EMAIL_SETTINGS = ("BAYMAX_EMAIL_FROM", "BAYMAX_EMAIL_PASSWORD", "BAYMAX_EMAIL_TO
 def main():
     os.chdir(ROOT)
     load_dotenv(ROOT / ".env", override=True, interpolate=False)
-    # First (after .env, for BAYMAX_CPU_PINNING), so every thread starts on the fast
-    # cores. By default only on the Orange Pi 5 (RK3588); elsewhere it does nothing.
-    use_performance_cpus()
+    use_performance_cpus()  # OPI4 compatibility hook; no scheduling changes.
     os.environ["BAYMAX_HARDWARE_PROFILE"] = "pc"
     os.environ.setdefault("BAYMAX_AUDIO_ENHANCEMENT", "1")
     try:

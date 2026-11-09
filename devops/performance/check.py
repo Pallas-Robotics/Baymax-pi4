@@ -62,14 +62,10 @@ def sensors(sysroot, npu_file=None):
                 temperatures.append(value)
         except ValueError:
             continue
-    paths = ([npu_file] if npu_file else list((sysroot / 'kernel/debug').glob('rknpu*/load'))
-             + [sysroot / 'kernel/debug/viplite/core_loading'])
-    loads = []
-    for path in paths:
-        loads.extend(float(n) for n in re.findall(r'(\d+(?:\.\d+)?)\s*%', read(path)))
-    loads = [n for n in loads if 0 <= n <= 100]
+    # Retain the report field for existing consumers, without accelerator probing.
     return {'temperature_c': max(temperatures) if temperatures else None,
-            'npu_percent': max(loads) if loads else None}
+            'npu_percent': None}
+
 
 
 def sample(pid, previous=None, proc=Path('/proc'), sysroot=Path('/sys'), npu_file=None):

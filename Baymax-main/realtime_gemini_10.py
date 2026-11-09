@@ -47,10 +47,6 @@ import queue
 import wave
 import requests as http_requests
 import cv2
-# Pinned to the RK3588's fast cores (pc_hardware.use_performance_cpus): no OpenCV thread pool.
-# Its three workers spun at 1.2-1.6% of a core each around the camera's 0.3 ms colour conversion.
-if os.getenv("BAYMAX_FAST_CPUS"):
-    cv2.setNumThreads(1)
 import sounddevice as sd
 import numpy as np
 # NOISE SUPPRESSION DISABLED (v10) — only the denoiser below used scipy.
@@ -146,21 +142,15 @@ def _ensure_pose_model():
         os.replace(target + ".part", target)
         print("[FALL] Model downloaded.")
 
-def _open_pose(force_cpu=False):
-    """Pose in its own process (features/vision_process.py): in Ember's process it held the
-    GIL and starved the mic and Gemini I/O. The RK3588 NPU (checked full model) when ready
-    and camera.pose_model is lite/full, else MediaPipe with camera.pose_model; heavy and
-    force_cpu always use MediaPipe on the CPU. None if the process could not start, or
-    hung for 60 s while loading (the camera thread then tries once on the CPU, or keeps
-    video only)."""
+def _open_pose(retry=False):
+    """OPI4 CPU pose in its isolated process; a failed child can be restarted once."""
     from functools import partial
     from features.vision_process import Remote
     from features.pose.backend import ChildPose
     try:
-        return Remote(partial(ChildPose, _POSE_MODEL_PATH,
-                              allow_npu=not force_cpu and _POSE_MODEL != "heavy"))
+        return Remote(partial(ChildPose, _POSE_MODEL_PATH))
     except Exception as error:
-        print(f"[CAM] Pose process could not start{' on the CPU' if force_cpu else ''} ({error}).", flush=True)
+        print(f"[CAM] Pose process could not start{' on the CPU' if retry else ''} ({error}).", flush=True)
         return None
 
 # Configuration
@@ -1032,8 +1022,7 @@ def _output_stream_settings():
     """(blocksize, latency) for the speaker stream, from BAYMAX_OUTPUT_BLOCKSIZE (frames per
     callback, 64-4096, default 1024) and BAYMAX_OUTPUT_LATENCY ('low', 'high' or seconds up
     to 0.5; unset keeps sounddevice's default, 'high'). Unset, the stream is opened as
-    sounddevice opens it; with Ember on the RK3588's fast cores pc_hardware sets 512 and
-    'low' first (SPEAKER_STREAM), unless .env or the shell set them. The limits keep the
+    sounddevice opens it. Only explicit owner settings change these defaults. The limits keep the
     audio cleanup working: its echo reference holds 250 ms (12000 frames, rendered()), so a
     longer block leaves AEC without its reference, and past 0.5 s (AEC3's delay range;
     rendered() caps output_latency_ms there) the mute during replies would end while Ember
@@ -1364,7 +1353,7 @@ def _update_face_visibility(landmarks):
 # ─── Fall Detection Thread ──────────────────────────────────────────────────
 def _fall_detection_thread():
     """Runs in a dedicated thread.  Captures camera frames, has pose run in its own
-    process (_open_pose: the RK3588 NPU or MediaPipe on the CPU), draws visual
+    process (_open_pose: MediaPipe on the OPI4 CPU), draws visual
     overlays and shares frames with the Gemini video sender and the MJPEG stream,
     and runs fall detection.  The pose landmarks are also used for face presence
     (conversation initiation). If the pose process cannot start, later fails or hangs
@@ -1448,11 +1437,11 @@ def _fall_detection_thread():
         if pose_model_ready:
             landmarker = _open_pose()
             if landmarker is None:
-                # E.g. librknnrt crashed the child while it set up the NPU (before its first
+                # A CPU model can crash its child during setup (before its first
                 # reply): MediaPipe on the CPU never touches RKNN. This is the one restart.
                 pose_restarts = 1
                 print("[CAM] Starting the pose process again, on the CPU.", flush=True)
-                landmarker = _open_pose(force_cpu=True)
+                landmarker = _open_pose(retry=True)
                 if landmarker is None:
                     print(video_only, flush=True)
         while not _shutdown_event.is_set():
@@ -1483,7 +1472,7 @@ def _fall_detection_thread():
                     if not pose_restarts:
                         pose_restarts = 1
                         print(f"[CAM] Pose process failed ({error}); restarting it on the CPU.", flush=True)
-                        landmarker = _open_pose(force_cpu=True)
+                        landmarker = _open_pose(retry=True)
                         if landmarker is None:
                             print(video_only, flush=True)
                     else:

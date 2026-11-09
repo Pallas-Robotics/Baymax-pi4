@@ -113,8 +113,7 @@ It processes whole 10 ms frames (480 samples at 48 kHz). v10 captures 960-sample
 delay. It used 1024-sample blocks, which kept 10 ms of every block for the next
 callback. The 10 ms saving is expected, not yet measured: it assumes the host delivers
 960-frame periods. If the device keeps its own period (1024 frames on some PipeWire or
-ALSA setups), PortAudio's buffer adapter holds a carry of its own; the Orange Pi 5 Max
-A/B will show which. A block that isn't whole frames (v8 still uses 1024) starts a 10 ms
+ALSA setups), PortAudio's buffer adapter holds a carry of its own; OPI4 device measurements must establish which. A block that isn't whole frames (v8 still uses 1024) starts a 10 ms
 output carry once and keeps leftovers, so no tail is zero-padded or discarded on every
 callback. Dropped stale audio (`BAYMAX_MAX_MIC_LAG_MS`) is counted in the block
 length actually cleaned. Reference storage
@@ -126,22 +125,8 @@ the output callback only appends to the reference buffer.
 **Speaker stream.** `start_output_stream()` opens the speaker with the two settings read
 once at start: `BAYMAX_OUTPUT_BLOCKSIZE` (frames per speaker callback, 64-4096, default
 1024) and `BAYMAX_OUTPUT_LATENCY` (`low`, `high` or seconds up to 0.5; unset passes no
-latency, so sounddevice's `high` applies). With Ember on the RK3588's fast cores
-(`pc_hardware.SPEAKER_STREAM`, Orange Pi 5 / 5 Max by default) they default to 512 and
-`low`, unless `.env` or the shell set them; everywhere else (the Orange Pi 4 Pro, x86,
-macOS, Windows) the stream is opened as before. Measured on the Orange Pi 5 Max with its
-USB speaker on PipeWire's default device: the old default stream reported 42.7 ms of
-PortAudio latency and the audio cleanup measured about 96 ms of output latency; 512/`low`
-reported 10.7 ms and about 42 ms, with no output underflows (the timing monitor's counter,
-read every 2 s) in three 3.5-minute runs, one with MediaPipe pose on the CPU, and the mic
-and speaker callbacks' timing unchanged. Values outside the ranges print one line and use
-the default: a block longer than the echo reference's 250 ms (12000 frames) leaves AEC
-without its reference, and an output latency past 0.5 s (AEC3's delay range, the cap on
-`output_latency_ms`) would end the mute during replies while Ember is still audible.
-When the stream isn't the 1024/default one, `[AUDIO] Speaker stream: ...` logs its reported
-latency at each connection. Lower values can underrun (crackle) on a busy board. Both are
-documented in `.env.example`; nothing opens a stream or sends anything anywhere. Tests:
-`SpeakerStreamTests` in `tests/test_v10_runtime.py` and `tests/test_pc_hardware.py`.
+latency, so sounddevice's `high` applies). This OPI4 fork keeps 1024 frames and default device latency unless the owner
+explicitly overrides them. Other-board tuning and measurements do not apply.
 
 Dependency: `pywebrtc-audio==0.2.0` (Apache-2.0), included in the isolated
 `requirements-pc.txt` environment. Native processing is imported only when

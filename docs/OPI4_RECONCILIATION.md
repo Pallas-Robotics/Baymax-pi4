@@ -8,7 +8,7 @@ change either repository's main or release channel until reviewed.
 ## History preserved
 
 - OPI4 starting point: `551f80a8fec73f8e19bf5948255152dd1380822d`.
-- Shared baseline: `2b8fb72e75cc87643e48119b1a9888798a2e3340`, from
+- Shared-fix source (not the OPI4 platform baseline): `2b8fb72e75cc87643e48119b1a9888798a2e3340`, from
   [Pallas PR #3](https://github.com/Pallas-Robotics/Baymax/pull/3). It already
   contains our OPi4 V1 and SD-card branches; those changes are not reapplied.
 - Our remaining work: `6eb21db2551c458f373752b1825746680e924065`, including the
@@ -29,9 +29,11 @@ change either repository's main or release channel until reviewed.
   English pause words, behind the language-adaptation owner opt-in. Exactly one
   language section is included when enabled, and none of that added section when
   disabled. Gemini's underlying multilingual behavior remains its own.
-- Keep CPU pinning in `auto` limited to RK3588. The A733 OPI4 Pro does not receive
-  RK3588 pinning, GIL or pinned-speaker defaults. Explicit owner overrides remain
-  possible; OPI5 measurements do not establish OPI4 performance.
+- OPI4 platform baseline is `551f80a`. Remove inherited and newly imported
+  Rockchip runtime/selection/conversion support, CPU-affinity and GIL policies,
+  and automatic speaker profiles. CPU MediaPipe is the default; explicit ONNX
+  is CPU-only. Stale accelerator/tuning settings cannot activate OPI5 behavior.
+  The no-op scheduling entry point remains only for existing launcher compatibility.
 - Point new OPI4 image/update defaults and contribution instructions at
   Baymax-pi4. Existing cards retain their saved repository, branch and settings;
   this source change does not migrate running devices or rebuild an SD image.

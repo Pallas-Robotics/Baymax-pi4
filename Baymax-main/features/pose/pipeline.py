@@ -1,24 +1,4 @@
-"""MediaPipe Pose Landmarker ("full", VIDEO mode, one pose) in numpy + OpenCV.
-
-The two neural networks run on an engine (engines.py: ONNX Runtime on the CPU or
-RKNN on the RK3588 NPU). Everything around them is ported from MediaPipe 0.10.35's
-C++ graph so the landmarks behave like `PoseLandmarker.detect_for_video`:
-
-- pose_detector_graph.cc: letterboxed 224x224 input (BORDER_ZERO), SSD anchors,
-  sigmoid scores >= min_pose_detection_confidence, weighted NMS (IoU 0.5),
-  letterbox removal, ROI from keypoints 0/1 (rotation, 2x distance), x1.25 square.
-- pose_landmarker_graph.cc: the detector runs only while not tracking; the ROI
-  for the next frame comes from the previous frame's auxiliary landmarks 33/34.
-- pose_landmarks_detector_graph.cc: 256x256 warp (BORDER_REPLICATE), pose flag
-  > min_pose_presence_confidence, sigmoid visibility/presence, heatmap
-  refinement (kernel 7), projection back to the image, then (VIDEO mode)
-  visibility low-pass (alpha 0.1) and a one-euro filter on x/y/z
-  (min_cutoff 0.05, beta 80, derivate_cutoff 1, scaled by the ROI size).
-
-The output is None or 33 `NormalizedLandmark`s with MediaPipe's conventions:
-x/y normalised to the image (may fall outside 0..1), z on the x scale relative
-to the hips, visibility/presence in 0..1. Numpy and OpenCV only.
-"""
+"""MediaPipe-compatible CPU ONNX pose geometry, tracking and smoothing."""
 import math
 
 import cv2
@@ -77,7 +57,7 @@ class Detection:
         self.keypoints = np.asarray(keypoints, np.float64)  # (4, 2) relative x, y
 
 
-# ── Detector ─────────────────────────────────────────────────────────────────
+# â”€â”€ Detector â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def ssd_anchors():
     """Anchor centres (2254, 2) for the 224x224 detector; fixed_anchor_size means w=h=1."""
     centres = []
@@ -235,7 +215,7 @@ def associate(rects, threshold):
     return result
 
 
-# ── Landmarks ────────────────────────────────────────────────────────────────
+# â”€â”€ Landmarks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def _sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))
 
@@ -292,7 +272,7 @@ def project(landmarks, rect):
     return out
 
 
-# ── Smoothing (VIDEO mode) ───────────────────────────────────────────────────
+# â”€â”€ Smoothing (VIDEO mode) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class LowPass:
     """mediapipe LowPassFilter over an array of independent values."""
 
@@ -371,7 +351,7 @@ class LandmarkSmoother:
         return out
 
 
-# ── The pipeline ─────────────────────────────────────────────────────────────
+# â”€â”€ The pipeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class PosePipeline:
     """detect(frame_bgr, timestamp_ms) -> 33 NormalizedLandmark or None, like
     PoseLandmarker.detect_for_video with num_poses=1 and the given confidences.

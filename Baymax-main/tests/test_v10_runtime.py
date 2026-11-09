@@ -979,7 +979,9 @@ class ReconnectTests(unittest.TestCase):
 
         async def receive(index, session, ns):
             if index == 0:
-                resumption.remember(SimpleNamespace(resumable=True, new_handle="h1"))
+                # Make the previous-session receipt strictly earlier even on coarse Windows clocks.
+                resumption.remember(SimpleNamespace(resumable=True, new_handle="h1"),
+                                    clock=lambda: time.monotonic() - 1)
                 raise ConnectionResetError()             # lost: the next connection resumes with h1
             if index == 1:
                 ns["_go_away_at"] = time.monotonic()
@@ -1273,25 +1275,6 @@ class SpeakerStreamTests(unittest.TestCase):
             with self.subTest(**bad):
                 self.assertEqual(self.settings(**bad), ((1024, None), 1))   # warned once, default kept
 
-    def test_on_the_rk3588_fast_cores_the_speaker_gets_512_frames_and_low_latency(self):
-        # Measured on the Orange Pi 5 Max's USB speaker: 42 ms of output latency instead of
-        # about 96 ms, no underflows. pc_hardware sets it before the runtime reads it.
-        import pc_hardware
-        names = ("BAYMAX_OUTPUT_BLOCKSIZE", "BAYMAX_OUTPUT_LATENCY", "BAYMAX_CPU_PINNING", "BAYMAX_GIL_SWITCH_MS",
-                 *pc_hardware.LIBRARY_THREADS, pc_hardware.FAST_CPUS_ENV, pc_hardware.SLOW_CPUS_ENV)
-        clean = {k: v for k, v in os.environ.items() if k not in names}
-        with patch("test_public_core_integration.CORE", V10):
-            read = load_function("_output_stream_settings", {"os": os})
-        for rk3588, expected in ((True, (512, "low")), (False, (1024, None))):   # the 4 Pro: as before
-            with self.subTest(rk3588=rk3588), patch.dict(os.environ, clean, clear=True), \
-                    patch.object(pc_hardware, "is_rk3588", return_value=rk3588), \
-                    patch.object(pc_hardware, "performance_cpus", return_value={4, 5, 6, 7}), \
-                    patch.object(pc_hardware, "pin_threads"), \
-                    patch.object(pc_hardware.os, "sched_getaffinity", Mock(return_value=set(range(8))), create=True), \
-                    patch.object(pc_hardware.os, "sched_setaffinity", Mock(), create=True), \
-                    patch.object(sys, "setswitchinterval"), patch("builtins.print"):
-                pc_hardware.use_performance_cpus()
-                self.assertEqual(read(), expected)
 
     def test_the_speaker_stream_is_opened_with_them(self):
         opened = []
@@ -1424,7 +1407,7 @@ class PoseProcessRestartTests(unittest.TestCase):
     stops. A None child is one that could not start (_open_pose returned None)."""
 
     class Dying:
-        device = "NPU"
+        device = "CPU"
         closed = False
 
         def detect(self, frame):
@@ -1477,8 +1460,8 @@ class PoseProcessRestartTests(unittest.TestCase):
             def __exit__(self, *exc):
                 latest.append(ns["_latest_frame"])
 
-        def open_pose(force_cpu=False):
-            opened.append(force_cpu)
+        def open_pose(retry=False):
+            opened.append(retry)
             return children.pop(0) if children else None   # None: could not start
 
         ns.update({
@@ -1506,7 +1489,7 @@ class PoseProcessRestartTests(unittest.TestCase):
     def test_a_dead_pose_process_restarts_once_on_the_cpu_and_video_continues(self):
         dying, working = self.Dying(), self.Working()
         ns, latest, faces, opened, logged = self.run_thread([dying, working])
-        self.assertEqual(opened, [False, True])     # NPU allowed first, then forced to the CPU
+        self.assertEqual(opened, [False, True])     # first CPU process hangs, replacement answers
         self.assertIn("Pose process failed (vision process stopped (exited)); restarting it on the CPU.", logged)
         self.assertEqual(latest, ["frame2", "frame3", "frame4", "frame5", "frame6", None])  # None: stopped
         self.assertEqual(faces, [None, ["pose of frame3"], ["pose of frame4"], ["pose of frame5"],
@@ -1526,10 +1509,10 @@ class PoseProcessRestartTests(unittest.TestCase):
         self.assertTrue(first.closed and second.closed)
 
     def test_a_pose_process_that_cannot_start_is_started_once_on_the_cpu(self):
-        # E.g. librknnrt crashed the child while it set up the NPU, before its first reply.
+        # E.g. a native model crashed the child during CPU setup, before its first reply.
         working = self.Working()
         ns, latest, faces, opened, logged = self.run_thread([None, working])
-        self.assertEqual(opened, [False, True])     # NPU allowed first, then forced to the CPU
+        self.assertEqual(opened, [False, True])     # first CPU process hangs, replacement answers
         self.assertIn("Starting the pose process again, on the CPU.", logged)
         self.assertNotIn("Pose unavailable", logged)
         self.assertEqual(latest, ["frame2", "frame3", "frame4", "frame5", "frame6", None])
@@ -1615,21 +1598,22 @@ class PoseProcessRestartTests(unittest.TestCase):
         import time
 
         class Pose:
-            """Like ChildPose: the NPU child answers its first frame and never its second (as
-            if librknnrt were stuck in the driver); the CPU child (allow_npu=False) answers."""
-            def __init__(self, model_path, allow_npu=True):
-                self.device = "NPU" if allow_npu else "CPU"
+            """Like ChildPose: the CPU child answers its first frame and never its second (as
+            if a model were stuck); the CPU child (hang=False) answers."""
+            def __init__(self, model_path, hang=True):
+                self.device = "CPU"
+                self.hang = hang
                 self.frames = 0
 
             def detect(self, frame):
                 self.frames += 1
-                if self.device == "NPU" and self.frames == 2:
+                if self.hang and self.frames == 2:
                     time.sleep(3600)
                 return None
     ''')
 
-    def real_pose_processes(self, name, source, allow_npu, timeout=0.5):
-        """Real vision processes (features.vision_process.Remote), one per allow_npu value,
+    def real_pose_processes(self, name, source, hang, timeout=0.5):
+        """Real vision processes (features.vision_process.Remote), one per hang value,
         running `source`'s Pose (saved as module `name`), with a frame limit of `timeout` s
         checked every 50 ms. Hung children are killed when the test ends."""
         from functools import partial
@@ -1646,8 +1630,8 @@ class PoseProcessRestartTests(unittest.TestCase):
         path = os.pathsep.join(filter(None, (directory.name, os.environ.get("PYTHONPATH"))))
         poses = []
         with patch.dict(os.environ, {"PYTHONPATH": path}):
-            for allowed in allow_npu:
-                poses.append(Remote(partial(module.Pose, "pose_landmarker_lite.task", allow_npu=allowed)))
+            for allowed in hang:
+                poses.append(Remote(partial(module.Pose, "pose_landmarker_lite.task", hang=allowed)))
                 self.addCleanup(poses[-1].close)
         for pose in poses:         # these run first: never leave a hung child behind
             self.addCleanup(lambda child=pose.child: child.poll() is None and child.kill())
@@ -1657,16 +1641,16 @@ class PoseProcessRestartTests(unittest.TestCase):
         # Real vision processes: before the watchdog, the camera thread (and so video to
         # Gemini, face presence and fall detection) waited on a hung child for good.
         import test_toolkit_vision_process as vision_tests
-        npu, cpu = self.real_pose_processes("fake_hanging_pose", self.HANGING, allow_npu=(True, False))
-        outcome, took = vision_tests.finishes(self, lambda: self.run_thread([npu, cpu]))
+        first_pose, cpu = self.real_pose_processes("fake_hanging_pose", self.HANGING, hang=(True, False))
+        outcome, took = vision_tests.finishes(self, lambda: self.run_thread([first_pose, cpu]))
         ns, latest, faces, opened, logged = outcome["value"]
-        self.assertEqual(opened, [False, True])     # NPU allowed first, then forced to the CPU
+        self.assertEqual(opened, [False, True])     # first CPU process hangs, replacement answers
         self.assertIn("Pose process failed (vision process hung: no reply in 0.5 s, so it was stopped); "
                       "restarting it on the CPU.", logged)
         self.assertEqual(latest, ["frame2", "frame3", "frame4", "frame5", "frame6", None])
         self.assertEqual([c.kwargs["device"] for c in ns["fall_worker"].share.call_args_list],
-                         ["NPU", "CPU", "CPU", "CPU"])
-        self.assertIsNotNone(npu.child.wait(timeout=2))      # stopped, not left hanging
+                         ["CPU", "CPU", "CPU", "CPU"])
+        self.assertIsNotNone(first_pose.child.wait(timeout=2))      # stopped, not left hanging
         self.assertLess(took, 5)
 
     SWITCHING = textwrap.dedent('''
@@ -1674,22 +1658,22 @@ class PoseProcessRestartTests(unittest.TestCase):
 
         from features.pose.backend import FallbackBackend
 
-        class Npu:
-            """Its second frame fails, as an RKNN error mid-run would."""
-            name, device = "NPU (fake)", "NPU"
+        class Onnx:
+            """Its second frame fails, as a CPU inference error would."""
+            name, device = "CPU (fake)", "CPU"
             frames = 0
 
             def detect(self, frame, timestamp_ms):
                 self.frames += 1
                 if self.frames == 2:
-                    raise RuntimeError("RKNN inference failed")
+                    raise RuntimeError("ONNX CPU inference failed")
                 return None
 
             def close(self):
                 pass
 
         class Cpu:
-            """MediaPipe as the NPU child loads it then: 1 s here (seconds on the 5 Max),
+            """MediaPipe as the CPU child loads it then: 1 s here (seconds on the 5 Max),
             longer than a frame may take."""
             name, device = "CPU (fake)", "CPU"
 
@@ -1703,9 +1687,9 @@ class PoseProcessRestartTests(unittest.TestCase):
                 pass
 
         class Pose:
-            """Like ChildPose on the NPU: the real FallbackBackend, from Npu to Cpu."""
-            def __init__(self, model_path, allow_npu=True):
-                self.backend = FallbackBackend(Npu(), Cpu, log=lambda message: None)
+            """Like ChildPose on the CPU: the real FallbackBackend, from Npu to Cpu."""
+            def __init__(self, model_path, hang=True):
+                self.backend = FallbackBackend(Onnx(), Cpu, log=lambda message: None)
 
             device = property(lambda self: self.backend.device)
 
@@ -1713,20 +1697,20 @@ class PoseProcessRestartTests(unittest.TestCase):
                 return self.backend.detect(frame, 0)
     ''')
 
-    def test_an_npu_error_mid_run_switches_to_the_cpu_in_the_same_pose_process(self):
+    def test_an_first_pose_error_mid_run_switches_to_the_cpu_in_the_same_pose_process(self):
         # FallbackBackend loads MediaPipe inside that frame. With a frame's limit the watchdog
         # stopped the child while it recovered and the camera thread spent its one restart on
         # a second process; a later failure then left video only until Ember restarted.
         import test_toolkit_vision_process as vision_tests
-        npu, = self.real_pose_processes("fake_switching_pose", self.SWITCHING, allow_npu=(True,))
-        outcome, took = vision_tests.finishes(self, lambda: self.run_thread([npu]))
+        first_pose, = self.real_pose_processes("fake_switching_pose", self.SWITCHING, hang=(True,))
+        outcome, took = vision_tests.finishes(self, lambda: self.run_thread([first_pose]))
         ns, latest, faces, opened, logged = outcome["value"]
         self.assertEqual(opened, [False])           # no second process: the one restart is still there
         self.assertNotIn("Pose process failed", logged)
         self.assertEqual([c.kwargs["device"] for c in ns["fall_worker"].share.call_args_list],
-                         ["NPU", "CPU", "CPU", "CPU", "CPU"])
+                         ["CPU", "CPU", "CPU", "CPU", "CPU"])
         self.assertEqual(latest, ["frame2", "frame3", "frame4", "frame5", "frame6", None])
-        self.assertIsNotNone(npu.child.wait(timeout=2))      # closed with the thread
+        self.assertIsNotNone(first_pose.child.wait(timeout=2))      # closed with the thread
 
 
 class PoseModelDownloadTests(unittest.TestCase):
@@ -1773,39 +1757,43 @@ class PoseModelDownloadTests(unittest.TestCase):
 
 
 class OpenPoseTests(unittest.TestCase):
-    """The real _open_pose and vision process, with a stand-in for ChildPose whose NPU
-    setup kills the process before its first reply, as a librknnrt crash in
-    init_runtime or the warm-up would (Python exceptions there fall back inside it)."""
+    """The real _open_pose and vision process, with a stand-in for ChildPose whose CPU
+    setup kills the process before its first reply, as a native CPU model setup error would."""
 
     FAKE = textwrap.dedent('''
         import os
 
-        class NpuCrashPose:
-            def __init__(self, model_path, allow_npu=True):
-                if allow_npu:
+        class CrashPose:
+            def __init__(self, model_path, hang=True):
+                if hang:
                     os._exit(1)
                 self.device = "CPU"
 
             def detect(self, frame):
                 return None
+
+        class WorkingPose(CrashPose):
+            def __init__(self, model_path):
+                self.device = "CPU"
     ''')
 
-    def test_a_child_that_dies_setting_up_the_npu_gives_none_and_the_cpu_child_starts(self):
+    def test_a_child_that_dies_setting_up_the_first_pose_gives_none_and_the_cpu_child_starts(self):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
-        Path(directory.name, "fake_npu_crash.py").write_text(self.FAKE)
+        Path(directory.name, "fake_first_pose_crash.py").write_text(self.FAKE)
         sys.path.insert(0, directory.name)
         self.addCleanup(sys.path.remove, directory.name)
-        self.addCleanup(sys.modules.pop, "fake_npu_crash", None)
-        import fake_npu_crash
+        self.addCleanup(sys.modules.pop, "fake_first_pose_crash", None)
+        import fake_first_pose_crash
         open_pose = load_function("_open_pose", {"_POSE_MODEL_PATH": "pose_landmarker_lite.task",
                                                  "_POSE_MODEL": "lite"})
         path = os.pathsep.join(filter(None, (directory.name, os.environ.get("PYTHONPATH"))))
         with patch.dict(os.environ, {"PYTHONPATH": path}), \
-                patch("features.pose.backend.ChildPose", fake_npu_crash.NpuCrashPose), \
+                patch("features.pose.backend.ChildPose", fake_first_pose_crash.CrashPose), \
                 patch("builtins.print") as printed:
             self.assertIsNone(open_pose())                      # the camera thread then retries
-            pose = open_pose(force_cpu=True)
+            with patch("features.pose.backend.ChildPose", fake_first_pose_crash.WorkingPose):
+                pose = open_pose(retry=True)
         self.assertIsNotNone(pose)
         self.addCleanup(pose.close)
         self.assertEqual(pose.device, "CPU")

@@ -2,10 +2,14 @@
 
 Run on the Linux Orange Pi with Ember already running. This read-only sampler
 measures system CPU, runtime **and descendant** CPU/RSS, system RAM used, the
-hottest exposed thermal zone, exposed NPU load, and existing speech-to-transcript,
+hottest exposed thermal zone and existing speech-to-transcript,
 reply-audio and scheduled-playback latency. It creates no artificial load and
 opens no audio/camera streams or provider connections. Exercise the feature
 yourself or with its existing approved scenario during collection.
+
+Accelerator telemetry is not applicable to this CPU-only fork. The legacy
+`npu_percent` report field remains null for report compatibility; no vendor
+load paths are probed.
 
 ## Baseline, feature, then combined load
 

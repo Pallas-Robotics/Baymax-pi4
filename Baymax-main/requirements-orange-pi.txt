@@ -1,5 +1,5 @@
-# Native Linux ARM64 / Orange Pi profile (Python 3.12), one file for every Orange Pi:
-# Orange Pi 4 Pro (Allwinner A733, no NPU runtime) and Orange Pi 5 / 5 Max (RK3588).
+# Orange Pi 4 Pro (Allwinner A733), native Linux ARM64 / Python 3.12.
+# Pose uses the CPU. This fork has no Rockchip runtime dependency.
 # MediaPipe 0.10.18 is the published ARM64 wheel; it requires NumPy < 2.
 # Separate pins avoid changing the tested Windows/macOS desktop environment.
 google-genai==1.62.0
@@ -44,10 +44,3 @@ tokenizers==0.22.2
 # 0.10.18's protobuf < 5 (pip otherwise backtracks through dozens of versions).
 opentelemetry-exporter-otlp-proto-grpc==1.27.0
 opentelemetry-sdk==1.27.0
-# NPU pose on the Orange Pi 5 / 5 Max (RK3588) only: the RKNN runtime's Python side
-# (it also needs librknnrt.so, ORANGE_PI_SETUP.md). It installs on every aarch64
-# board, including the Orange Pi 4 Pro, but Ember imports it only after detecting
-# an RK3588 with the converted, checked models; anywhere else pose stays on MediaPipe
-# CPU. Same version as setup_converter.sh's default, which the accuracy check
-# records; wheels exist up to Python 3.12.
-rknn-toolkit-lite2==2.3.2 ; platform_machine == "aarch64" and python_version < "3.13"
