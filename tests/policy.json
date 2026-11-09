@@ -8,7 +8,8 @@
     "Baymax-main/requirements*",
     "tests/**",
     ".github/**",
-    "Baymax-main/features/toolkits/gemini_tools.py"
+    "Baymax-main/features/toolkits/gemini_tools.py",
+    "Baymax-main/features/experimental/**"
   ],
   "documentation_paths": [
     "README.md",

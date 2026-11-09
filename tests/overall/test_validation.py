@@ -55,7 +55,7 @@ class SuiteSelectionTests(unittest.TestCase):
                 ('Baymax-main/features/conversational_ability/live_models.py',
                  ['conversational_ability', 'family', 'information', 'memory_palace', 'runtime', 'startup']),
                 # test_engage, test_live_eval, test_v10_runtime and test_toolkit_eyes read the persona.
-                ('Baymax-main/features/persona.py', ['conversational_ability', 'eyes', 'languages', 'runtime']),
+                ('Baymax-main/features/persona.py', ['conversational_ability', 'device_settings', 'eyes', 'languages', 'runtime']),
                 # test_language_eval imports the live eval and test_live_eval's fake session.
                 ('Baymax-main/evals/live_eval.py', ['languages', 'runtime']),
                 ('Baymax-main/tests/test_live_eval.py', ['languages', 'runtime']),
@@ -68,7 +68,8 @@ class SuiteSelectionTests(unittest.TestCase):
                 # test_memory_saving reads the service's stop timeout and the eyes' join.
                 ('devops/mvp/install_autostart.py', ['memory_palace', 'startup']),
                 ('Baymax-main/features/eyes/controller.py', ['conversational_ability', 'eyes', 'memory_palace']),
-                ('Baymax-main/tests/test_public_core_integration.py', ['conversational_ability', 'memory_palace', 'runtime']),
+                ('Baymax-main/tests/test_public_core_integration.py', ['conversational_ability', 'information', 'memory_palace', 'runtime']),
+                ('Baymax-main/features/toolkits/offline_fall.py', ['device_settings', 'information', 'runtime', 'startup']),
                 ('Baymax-main/tests/test_waiting_cue.py', ['conversational_ability', 'runtime'])]:
             with self.subTest(path=path):
                 self.assertEqual(validation.selected_suites(self.suites, [path], self.policy),
@@ -76,6 +77,11 @@ class SuiteSelectionTests(unittest.TestCase):
 
     def test_docs_select_graph_checks(self):
         self.assertEqual(validation.selected_suites(self.suites, ['docs/features/FEATURE_LOG.md'], self.policy), ['graphify', 'overall', 'performance'])
+
+    def test_owner_optin_registry_selects_every_suite(self):
+        self.assertEqual(validation.selected_suites(self.suites,
+                         ['Baymax-main/features/experimental/__init__.py'], self.policy),
+                         sorted(self.suites))
 
 
 if __name__ == '__main__':

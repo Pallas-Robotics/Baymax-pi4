@@ -8,7 +8,8 @@
     "devops/mvp/**",
     "devops/clickables/**",
     "Baymax-main/dev_settings.py",
-    "Baymax-main/pc_hardware.py"
+    "Baymax-main/pc_hardware.py",
+    "Baymax-main/features/toolkits/offline_fall.py"
   ],
   "python": [
     {
