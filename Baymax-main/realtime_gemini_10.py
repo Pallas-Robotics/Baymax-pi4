@@ -2382,13 +2382,17 @@ def _run_voice_analysis():
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 async def run():
+    from features.conversational_ability import session as session_state
     global _last_robot_speech_ts, _stop_started_ts
     monitor.start(lambda: {"playback_bytes": len(_playback_buffer), "gemini_generating_audio": _gemini_speaking, "audio_input": dict(_audio_enhancer.metrics) if _audio_enhancer is not None else None})
     public_toolkit.prewarm()
     client = genai.Client(
         api_key=API_KEY, http_options={"api_version": "v1alpha"}
     )
+    quick_failures = 0
     while True:
+        connected_at = time.monotonic()
+        connected = False
         try:
             monitor.finish_transcripts()
             monitor.emit("connecting", "Connecting to Gemini Live")
@@ -2397,6 +2401,8 @@ async def run():
             async with client.aio.live.connect(
                 model=MODEL, config=_build_config()
             ) as live_session:
+                connected = True
+                connected_at = time.monotonic()
                 live_session = _address_gate.watch(live_session)  # notes Ember's own messages
                 print("Connected. System ready.")
                 monitor.emit("listening", "Connected to Gemini; listening")
@@ -2456,23 +2462,27 @@ async def run():
                     _abort_connection(live_session)
                     output_stream.stop()
                     output_stream.close()
-                    # Give ALSA/PipeWire time to release the device before reconnect
-                    # (nothing reconnects when stopping).
-                    if not _shutdown_event.is_set():
-                        await asyncio.sleep(2)
         except Exception as e:
+            if not connected and session_state.connection_not_started(e):
+                session_state.not_tried()
+            delay, quick_failures = session_state.retry_plan(e, time.monotonic() - connected_at, quick_failures)
             print(f"connection failed {e}. retrying...")
             _boot_status("connecting", f"Connection failed: {e}", error=True)
+            if delay is not None:
+                await asyncio.sleep(delay)
+                continue
+            # Device/unknown errors retain the existing reset and release delays.
+            await asyncio.sleep(2)
             # Reset PortAudio to recover from ALSA/PipeWire device errors
             print("[AUDIO] Resetting PortAudio state...")
             try:
-                sd._terminate()
+                await asyncio.to_thread(sd._terminate)
             except Exception:
                 pass
-            time.sleep(5)
+            await asyncio.sleep(5)
             try:
-                sd._initialize()
-                mic, spk = get_default_device_id()
+                await asyncio.to_thread(sd._initialize)
+                mic, spk = await asyncio.to_thread(get_default_device_id)
                 sd.default.device = [mic, spk]
                 print(f"[AUDIO] PortAudio reset. Input→{mic}, Output→{spk}")
             except Exception as reinit_err:

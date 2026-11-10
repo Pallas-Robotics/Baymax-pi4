@@ -157,6 +157,19 @@ class ToolkitTests(unittest.TestCase):
             stop.set()
             first.join(2)
 
+    def test_prewarm_does_not_refresh_when_toolkit_is_disabled(self):
+        class Ticks:
+            count = 0
+            def wait(self, seconds):
+                self.count += 1
+                return self.count > 1
+        weather, location = Mock(), Mock()
+        with patch.object(gemini_tools, "weather", weather), patch.object(gemini_tools, "location", location), \
+                patch.object(gemini_tools, "enabled", return_value=False):
+            gemini_tools._keep_warm(Ticks())
+        weather.refresh.assert_not_called()
+        location.refresh.assert_not_called()
+
     def test_weather_failure_has_no_invented_conditions(self):
         weather = Weather(Location(lambda *args: IP), lambda *args: {})
         self.assertIn("error", weather.get())

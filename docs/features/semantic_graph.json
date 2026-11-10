@@ -2871,6 +2871,18 @@
       "author": null,
       "contributor": null,
       "rationale": "Original measurements retain temporary-copy provenance. The review-branch source update was not deployed to the now-unplugged robot."
+    },
+    {
+      "id": "joe_opi4_integration_candidate",
+      "label": "Joe language cache profile and network retry OPI4 candidate",
+      "file_type": "document",
+      "source_file": "docs/features/JOE_OPI4_PORT.md",
+      "source_location": "document",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
     }
   ],
   "edges": [
@@ -6383,6 +6395,28 @@
       "source_file": "docs/features/OPI4_LANGUAGE_RESULTS.md",
       "source_location": "Configuration and scope — integration paragraph",
       "weight": 1.0
+    },
+    {
+      "source": "joe_opi4_integration_candidate",
+      "target": "docs_features_feature_log_document",
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/features/JOE_OPI4_PORT.md",
+      "source_location": "Scope and source attribution",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "joe_opi4_integration_candidate",
+      "target": "baymax_main_features_conversational_ability_readme_session_resumption",
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/features/JOE_OPI4_PORT.md",
+      "source_location": "Scope and source attribution",
+      "weight": 1.0,
+      "_origin": "semantic"
     }
   ],
   "hyperedges": [

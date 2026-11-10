@@ -15,6 +15,15 @@ of this inventory and Git.
 The SD image is specifically for the **Orange Pi 4 Pro**. The 5 Max uses its
 documented Armbian/clickables installation, not the 4 Pro image.
 
+## Joe's OPI4 integration candidate
+
+The focused candidate builds on our original `opi4-chat-timing` revision
+`54ee70e`. It ports Joe Kojima's language, weather-cache, quiet-profile and
+network-retry changes, with OPI4-specific profile retry handling. See
+[scope, attribution and validation](JOE_OPI4_PORT.md). Offline software testing
+is separate from spoken, chamber, performance and physical evidence. No live
+installation or release-channel promotion is part of preparing this candidate.
+
 ## Core features
 
 Paths below are relative to `Baymax-main/`.

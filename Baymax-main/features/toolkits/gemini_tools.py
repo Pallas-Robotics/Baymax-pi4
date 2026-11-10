@@ -217,6 +217,8 @@ def _keep_warm(stop, clock=time.monotonic):
         monitor.activity('location/weather', running=False, background=True)
     located = clock()
     while not stop.wait(WEATHER_REFRESH_S):
+        if not enabled():
+            continue
         try:
             if clock() - located >= LOCATION_REFRESH_S:
                 location.refresh()

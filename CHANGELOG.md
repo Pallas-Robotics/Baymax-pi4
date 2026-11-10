@@ -1,5 +1,14 @@
 # MVP (unreleased)
 
+- OPI4 candidate: adapt Joe Kojima's network retry/resumption changes
+  (30c7d7b, 7f21fab, c3deba5) to the existing audio lifecycle, with bounded
+  0.3–4.8 second transport retries and nonblocking device-reset delays. Port
+  his language wording (51f15f1, 2d50ced) and weather/profile work (ee940fa).
+  Profile changes stay pending after speech begins during lookup, send failure,
+  cancellation or concurrent edits. No model/device configuration or release
+  channel is changed. See docs/features/JOE_OPI4_PORT.md for attribution,
+  external requests and validation boundaries.
+
 - Joe Kojima: keep weather/location caches warm and defer family profile notes until Ember is quiet (source ee940fa9f7f29680fe012ab363122df1197b3a29). Background refresh requests and tests are documented in the toolkit README.
 
 - Integrate the tested language-adaptation instruction into the shared Ember

@@ -22,3 +22,9 @@ Message text, replies, reminder text and the notes do go to the app's database
 Offline, everything waits in the local databases and syncs when the link is
 back. Tests: `tests/test_toolkit_family.py` (fake site) and
 `tests/test_toolkit_reminder_repeats.py`.
+
+Joe Kojima's quiet-profile guard (ee940fa) is extended in the OPI4 candidate:
+quietness is checked again after loading the profile, and failed/cancelled or
+deferred deliveries stay pending. An edit arriving during a send remains pending
+for the next poll. This is a local best-effort quiet check, not an atomic
+guarantee about remote generation. No additional data or provider is introduced.

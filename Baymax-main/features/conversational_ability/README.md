@@ -1,5 +1,22 @@
 # Conversational ability
 
+## Joe's OPI4 integration candidate
+
+The candidate ports Joe Kojima's language wording (51f15f1, 2d50ced), network
+backoff (30c7d7b, c3deba5), and untried resume-handle recovery (7f21fab).
+Replies follow words rather than accents or transcript scripts; internal tags
+stay unspoken, and the offline pause phrases remain English. Network-only
+retries wait 0.3, 0.6, 1.2, 2.4, then at most 4.8 seconds. A transport failure
+before setup keeps its resume handle; a server refusal still consumes it.
+Device/unknown failures retain the existing audio reset, with awaited delays
+and device calls on a worker thread. Audio ownership stays in the existing
+OPI4 runtime; this does not replace it with Joe's newer runtime or enable a new
+model, microphone, camera, search session, memory scheduler or GoAway handover.
+
+Regression coverage: `tests/test_session.py`, `tests/test_v10_runtime.py` and
+`tests/test_live_eval.py`. Validation results, attribution and remaining live
+checks are in [the candidate record](../../../docs/features/JOE_OPI4_PORT.md).
+
 Responsive turn-taking and local microphone processing, independent of memory or face recognition.
 Integrated with desktop v8 and robot v10.
 
