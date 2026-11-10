@@ -17,6 +17,7 @@ features/
   person_recognition/ Recognized people and confirmed identity context
   toolkits/           Callable information sources and other bounded actions
   conversational_ability/ Responsive listening, audio cleanup and turn-taking
+  offline_speech/       Optional CPU Whisper tiny/base + Silero, author: natey
   eyes/                Normal blinking and delayed thinking on MAX7219 matrices
   pose/                Camera pose: MediaPipe on the CPU, or the RK3588 NPU when ready
 ```
@@ -38,6 +39,11 @@ Feature package imports must not start providers, open devices or run background
 workers. Runtime startup owns lifecycle and enablement; each implemented feature
 needs documented inputs, outputs, data flows and tests. Runtime data stays under
 the existing `BAYMAX_DATA_DIR`, outside the source tree in Docker.
+
+[OFFLINE Speech](offline_speech/README.md) is an opt-in CPU subprocess for local
+transcription with timestamped vision/fall metadata. It taps existing cleaned
+audio and reports separate local Monitor events; Gemini's conversation path is
+preserved. Models are prepared explicitly before runtime. Author: natey.
 
 [Conversational ability](conversational_ability/README.md) is implemented independently
 of people recognition and memory. Memory Palace is reviewed in PR #13.

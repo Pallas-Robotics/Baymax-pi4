@@ -6,7 +6,7 @@ Optimised for low latency:
 - Interrupt flushes playback buffer immediately.
 - Graceful camera fallback if hardware unavailable.
 - first_audio_latency tracks perceived delay (server thinking time).
-- No client-side VAD — Gemini handles voice activity detection.
+- Gemini handles conversation VAD; optional OFFLINE Speech runs a local sidecar.
 
 Added features:
 - Gemini built-in input/output audio transcription (no local ASR model needed).
@@ -1117,6 +1117,8 @@ def _update_face_visibility(landmarks):
         with _face_state_lock:
             global _face_last_seen_ts
             _face_last_seen_ts = time.monotonic()
+        return True
+    return False
 
 
 # ─── Fall Detection Thread ──────────────────────────────────────────────────
@@ -1128,6 +1130,7 @@ def _fall_detection_thread():
     (conversation initiation). If the pose process cannot start or later fails, it is
     started again once, on the CPU; video continues either way."""
     global _latest_frame, _annotated_frame, _annotated_inputs
+    from features.offline_speech import worker as offline_speech
 
     pose_model_ready = False
     if POSE_TRACKING_ENABLED:
@@ -1214,6 +1217,7 @@ def _fall_detection_thread():
             t0 = time.monotonic()
 
             ret, frame = cap.read()
+            frame_captured_at = time.monotonic()
             if not ret:
                 time.sleep(0.1)
                 continue
@@ -1246,9 +1250,12 @@ def _fall_detection_thread():
                                       device=landmarker.device)
 
             # Share face-presence signal with the initiation monitor
-            _update_face_visibility(landmarks)
+            face_visible = bool(_update_face_visibility(landmarks))
 
             result = fall_detector.update(landmarks) if fall_detector else no_fall
+            offline_speech.observe_vision(frame_captured_at, pose_available=landmarks is not None,
+                                           face_visible=face_visible,
+                                           fall_detected=result["fall_detected"], fall_active=result["fall_active"])
             if result["trunk_angle"] is not None:
                 angle_history.append(result["trunk_angle"])
                 a = result["trunk_angle"]
@@ -1457,6 +1464,8 @@ def _fall_detection_thread():
 
 # ─── Pipeline stages ─────────────────────────────────────────────────────────
 async def listen_audio():
+    from features.offline_speech import worker as offline_speech
+    offline_speech.reset()
     loop = asyncio.get_running_loop()
     if _audio_enhancer is not None:
         _audio_enhancer.reset()
@@ -1499,6 +1508,8 @@ async def listen_audio():
         #     send_bytes = raw_bytes
         clean_mono = _audio_enhancer.process(mono_data, time_info) if _audio_enhancer is not None else mono_data
         send_bytes = clean_mono.tobytes()
+        from features.offline_speech import tap
+        tap(send_bytes, SEND_SAMPLE_RATE, time_info, _audio_enhancer)
         if _waiting_cue is not None:
             _waiting_cue.microphone(send_bytes, INTERRUPT_RMS_THRESHOLD)
 
@@ -2493,6 +2504,12 @@ if __name__ == "__main__":
         _boot_status("pose_model", f"Pose model error: {e}", error=True)
         print(f"[BOOT] Pose model load failed: {e}")
 
+    # Independent, opt-in CPU speech child; no model work on audio/camera threads.
+    from features.offline_speech import worker as offline_speech
+    offline_speech.on_status = lambda state, detail: monitor.record("offline_speech", detail)
+    offline_speech.on_result = lambda result: monitor.record("offline_speech", "Local speech: " + result["text"])
+    offline_speech.start()
+
     # ── Start fall detection in a dedicated thread ──
     _boot_status("camera", "Starting camera & pose tracking...")
     _fall_thread = threading.Thread(target=_fall_detection_thread, daemon=True)
@@ -2516,6 +2533,7 @@ if __name__ == "__main__":
             monitor.emit("stopping", "Stopping conversation and finishing local session analysis")
             print("\nInterrupted by user.")
             _shutdown_event.set()
+            offline_speech.stop()
             memory_deadline = (_stop_started_ts or time.monotonic()) + MEMORY_STOP_SECONDS
 
             # Stop recording thread gracefully
