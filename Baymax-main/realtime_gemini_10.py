@@ -59,6 +59,7 @@ from google import genai
 from google.genai import types
 import runtime_monitor as monitor
 from features.toolkits.fall_detection import worker as fall_worker
+from features.device_settings import settings as device_settings  # mic / camera / volume from the Ember app
 from dotenv import load_dotenv
 from semantic_embedder import SemanticEmbedder, download_model, missing_packages, model_present
 
@@ -1382,7 +1383,25 @@ def _update_face_visibility(landmarks):
 
 # ─── Fall Detection Thread ──────────────────────────────────────────────────
 def _fall_detection_thread():
-    """Runs in a dedicated thread.  Captures camera frames, has pose run in its own
+    """Owns the camera for the whole run. It is open only while the Ember app
+    allows it (device_settings): switched off, the camera is released and the
+    pose process closed, so there is no fall detection, no MJPEG stream and no
+    video to Gemini. Switched on again, it starts over."""
+    while device_settings.wait_for_camera(_shutdown_event):
+        _camera_session()
+        if _shutdown_event.is_set():
+            break
+        if device_settings.camera_on():
+            # No camera found, or the session failed: as before, don't keep
+            # retrying; switching the camera off and on in the app tries again.
+            while device_settings.camera_on() and not _shutdown_event.wait(1):
+                pass
+        if not device_settings.camera_on():
+            print("[CAM] Camera off from the Ember app: released; no fall detection, stream or video to Gemini.", flush=True)
+
+
+def _camera_session():
+    """One camera run.  Captures camera frames, has pose run in its own
     process (_open_pose: the RK3588 NPU or MediaPipe on the CPU), draws visual
     overlays and shares frames with the Gemini video sender and the MJPEG stream,
     and runs fall detection.  The pose landmarks are also used for face presence
@@ -1474,7 +1493,7 @@ def _fall_detection_thread():
                 landmarker = _open_pose(force_cpu=True)
                 if landmarker is None:
                     print(video_only, flush=True)
-        while not _shutdown_event.is_set():
+        while not _shutdown_event.is_set() and device_settings.camera_on():
             t0 = time.monotonic()
 
             ret, frame = cap.read()
@@ -1585,7 +1604,10 @@ def _fall_detection_thread():
             _latest_frame = None  # Gemini gets no frozen picture once the camera stops.
         cap.release()
         fall_worker.stop()
-        print("[FALL] Fall detection thread stopped.")
+        # Nothing stale may reach the stream either once the camera is off.
+        with _annotated_frame_lock:
+            _annotated_frame = None
+        print("[FALL] Camera released; fall detection stopped.")
 
 
 # ─── Static / crackle noise suppression ─────────────────────────────────────
@@ -1738,6 +1760,8 @@ async def listen_audio():
     #           flush=True)
 
     def audio_callback(indata, frames, time_info, status):
+        if not device_settings.mic_on():
+            return  # Microphone off from the Ember app: nothing is heard, sent, recorded or analysed.
         global _last_loud_mic_ts, _mic_level, _mic_status, _mic_statuses
         if status:
             # monitor_queues reports it, like the level: a flushed print here, on PortAudio's
@@ -1864,32 +1888,32 @@ def _encode_video_frame(frame):
     return buffer.tobytes()
 
 async def send_video_realtime(session):
-    """Reads shared frames from the fall detection thread and sends to Gemini every 3s."""
+    """Reads shared frames from the fall detection thread and sends to Gemini every 3s.
+
+    Sends nothing while there are no frames: no camera, the camera switched off from
+    the Ember app (the camera thread clears the frame when it stops), or a cold Orange
+    Pi 4 Pro boot, where the camera thread shares nothing until the pose process has
+    loaded (5+ s). A session's first frame goes as soon as there is one, so the startup
+    greeting can see the room."""
     loop = asyncio.get_running_loop()
-    # Wait for the fall detection thread's first frame. On a cold Orange Pi 4 Pro boot the
-    # camera thread shares nothing until the pose process has loaded (5+ s), and giving up
-    # after 5 s left Gemini blind until the next reconnect. A board with no camera just polls.
-    waited = 0
-    while True:
-        with _latest_frame_lock:
-            if _latest_frame is not None:
-                break
-        if waited == 50:
-            print("[VIDEO] No camera frames yet; video starts when the camera does.")
-        waited += 1
-        await asyncio.sleep(0.1 if waited < 300 else 2.0)
-
-    print("[VIDEO] Sending shared camera frames to Gemini (1 frame / 3s).")
-
+    sending = None
     first = True
+    waited = 0
     while True:
         if not first:  # the first frame goes at once, so the startup greeting can see the room
             await asyncio.sleep(3.0)
         t0 = time.perf_counter()
 
         with _latest_frame_lock:
-            frame = _latest_frame
+            frame = _latest_frame if device_settings.camera_on() else None
+        if (frame is not None) != sending:
+            sending = frame is not None
+            print("[VIDEO] Sending shared camera frames to Gemini (1 frame / 3s)." if sending
+                  else "[VIDEO] No camera frames (camera off or unavailable) — no video to Gemini.")
         if frame is None:
+            if first:  # still waiting for this session's first frame: look again soon
+                waited += 1
+                await asyncio.sleep(0.1 if waited < 300 else 2.0)
             continue
 
         jpg_bytes = await loop.run_in_executor(None, _encode_video_frame, frame)
@@ -2878,20 +2902,25 @@ def _boot_status(stage: str, message: str, ready: bool = False, error: bool = Fa
 
 if __name__ == "__main__":
     _boot_status("audio", "Configuring audio devices...")
+    device_settings.start()  # saved speaker volume; camera / microphone switched off in the app stay off
 
     # Camera and pose first: the pose process loads (5+ s on a cold Orange Pi 4 Pro boot)
     # while the memory embedder loads below, so the first camera frame, and the startup
     # greeting that waits for it, come seconds sooner. Neither needs the other.
     # ── Download pose model if needed ──
-    _boot_status("pose_model", "Loading pose model...")
-    try:
-        _ensure_pose_model()
-    except Exception as e:
-        _boot_status("pose_model", f"Pose model error: {e}", error=True)
-        print(f"[BOOT] Pose model load failed: {e}")
+    if not device_settings.camera_on():
+        _boot_status("pose_model", "Camera off in the Ember app: fall detection off")
+    else:
+        _boot_status("pose_model", "Loading pose model...")
+        try:
+            _ensure_pose_model()
+        except Exception as e:
+            _boot_status("pose_model", f"Pose model error: {e}", error=True)
+            print(f"[BOOT] Pose model load failed: {e}")
 
     # ── Start fall detection in a dedicated thread ──
-    _boot_status("camera", "Starting camera & pose tracking...")
+    _boot_status("camera", "Starting camera & pose tracking..." if device_settings.camera_on()
+                 else "Camera off in the Ember app")
     _fall_thread = threading.Thread(target=_fall_detection_thread, daemon=True)
     _fall_thread.start()
     print(f"[CAM] Camera/pose thread started (fall detection {'active' if FALL_DETECTION_ENABLED else 'OFF (device.toml)'}).")

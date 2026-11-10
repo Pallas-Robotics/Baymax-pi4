@@ -1114,6 +1114,7 @@ class RealTimeThreadTests(unittest.TestCase):
             def __exit__(self, *args):
                 pass
         ns = {"asyncio": asyncio, "np": np, "queue": queue, "time": time, "_audio_enhancer": None,
+              "device_settings": SimpleNamespace(mic_on=lambda: True, camera_on=lambda: True), 
               "_waiting_cue": None, "INPUT_CHANNELS": 1, "_audio_record_queue": queue.Queue(),
               "_people": SimpleNamespace(feed_audio=lambda *a: None), "_mic_alignment": SimpleNamespace(fix=lambda block: block, flips=0, shifted=False), "_mic_alignment_shown": 0, "_gemini_speaking": False,
               "audio_queue_mic": asyncio.Queue(), "INTERRUPT_RMS_THRESHOLD": 1000,
@@ -1165,6 +1166,7 @@ class RealTimeThreadTests(unittest.TestCase):
             def __exit__(self, *args):
                 pass
         ns = {"asyncio": asyncio, "np": np, "queue": queue, "time": time, "_audio_enhancer": None,
+              "device_settings": SimpleNamespace(mic_on=lambda: True, camera_on=lambda: True), 
               "_waiting_cue": None, "INPUT_CHANNELS": 1, "_audio_record_queue": queue.Queue(),
               "_people": SimpleNamespace(feed_audio=lambda *a: None), "_mic_alignment": SimpleNamespace(fix=lambda block: block, flips=0, shifted=False), "_mic_alignment_shown": 0, "_gemini_speaking": False,
               "audio_queue_mic": asyncio.Queue(), "INTERRUPT_RMS_THRESHOLD": 1000,
@@ -1242,7 +1244,8 @@ class RealTimeThreadTests(unittest.TestCase):
         greeter = SimpleNamespace(video_sent=threading.Event())
         ns = {"asyncio": asyncio, "time": time, "cv2": FakeCv2, "_latest_frame_lock": threading.Lock(),
               "_latest_frame": "frame", "types": SimpleNamespace(Blob=lambda **kw: SimpleNamespace(**kw)),
-              "tracker_send_video": SimpleNamespace(record=Mock()), "_proactive": greeter}
+              "tracker_send_video": SimpleNamespace(record=Mock()), "_proactive": greeter,
+              "device_settings": SimpleNamespace(mic_on=lambda: True, camera_on=lambda: True)}
         with patch("test_public_core_integration.CORE", V10):
             for name in ("_encode_video_frame", "send_video_realtime"):
                 load_function(name, ns)
@@ -1266,6 +1269,7 @@ class RealTimeThreadTests(unittest.TestCase):
         ns = {"asyncio": asyncio, "time": time, "_latest_frame_lock": threading.Lock(), "_latest_frame": None,
               "types": SimpleNamespace(Blob=lambda **kw: SimpleNamespace(**kw)),
               "tracker_send_video": SimpleNamespace(record=Mock()), "_proactive": greeter,
+              "device_settings": SimpleNamespace(mic_on=lambda: True, camera_on=lambda: True),
               "_encode_video_frame": lambda frame: b"jpeg"}
 
         async def wait(seconds):
@@ -1535,7 +1539,8 @@ class PoseProcessRestartTests(unittest.TestCase):
             "_notify_webapp": Mock(),
         })
         ns.update(names)
-        thread = load_function("_fall_detection_thread", ns)
+        ns["device_settings"] = SimpleNamespace(mic_on=lambda: True, camera_on=lambda: True)
+        thread = load_function("_camera_session", ns)      # one camera run of _fall_detection_thread
         with patch.dict(os.environ, {"BAYMAX_HARDWARE_PROFILE": "test"}), patch("builtins.print") as printed:
             thread()
         logged = " ".join(str(c.args[0]) for c in printed.call_args_list if c.args)

@@ -1,5 +1,56 @@
 # MVP (unreleased)
 
+- Microphone, camera and speaker volume from the Ember app (dashboard Settings tab,
+  Company-Website `device-settings`), carried by the app link's inbox and sync:
+  - `features/device_settings.py` holds them, saved in `device_settings.json`
+    (or under `BAYMAX_DATA_DIR`), so a camera or microphone switched off stays off
+    across restarts. Only the dashboard can change them.
+  - Microphone off: v10's capture callback drops each block first, so nothing
+    reaches Gemini, the recorder, voice analysis or the wake words. Ember still
+    passes on messages and reminders.
+  - Camera off: the camera thread releases the camera and stops the pose model
+    and the fall worker. There is no fall detection, no MJPEG stream and no video
+    to Gemini. Switched on again, it starts over. A boot with the camera off skips
+    the pose model and says so in the boot status.
+  - Volume: the whole speaker through PipeWire (`pactl`, else `wpctl`), 10-100 %,
+    put back at boot. The sync reports whether it worked.
+  - When the camera or microphone changes, Ember says who did it, and each new
+    session tells Gemini what is off.
+
+- Svanik's test harness (#28 live eval, #31 robot rig) adapted to v10 for mvp-v10:
+  - Both read the core that `run_pc.py` starts (`realtime_gemini_10.py` here, v8
+    elsewhere). The config reader now follows v10's prompt, which is built from
+    `features/persona.py` plus the `[MEMORY CONTEXT]` / `[WHEN TO SPEAK]` sections
+    that `device.toml` switches on. Before this change it failed with
+    `NameError: persona`, and every feature scenario was skipped.
+  - v10's address gate is part of what gets tested. Layer 1 runs the branch's own
+    `AddressGate` over each session, and Layer 2 reads its `[ADDRESS] ... dropped
+    reply` log line, so checks judge what the robot plays, and a dropped answer is
+    reported as dropped. Scenario lines now name Ember. New scenarios: `overheard`
+    and `follow-up` (Layer 1), `overheard-conversation` (robot). New expectation in
+    both layers: `silent`.
+  - Rig privacy for v10: each run gets its own `BAYMAX_DATA_DIR`
+    (`.ember-rig-data-*` in the checkout, deleted afterwards), covering recordings,
+    transcripts, ChromaDB memories, reminders, family messages and the cloud
+    queue. `BAYMAX_DEVICE_KEY` is blanked (no cloud uplink or Ember app link), and
+    dashboard posts go to a closed port (no fall-alert emails from synthetic runs).
+    Device keys and email settings are never copied from the robot's `.env`, and
+    the probe never prints a `*KEY*` setting.
+  - `prepare_checkout.sh` can reuse a LattePanda unit's venv (`EMBER_RIG_VENV`).
+  - Fixes to the rig from review:
+    - `prepare_checkout.sh` no longer stops with "UV: unbound variable" when a v10
+      checkout has no `bootstrap.py`. The v10 native packages install with uv, or
+      with pip if the robot has no uv, using `CC=gcc CXX=g++` as ember-update does.
+    - Calibration plays at the config's `gain_db`, so the edit-and-recalibrate loop
+      now converges. A config gain that differs from the calibrated one stops the
+      run as out of calibration.
+    - A log character split across two reads (Hindi) is no longer corrupted.
+    - When the suite time limit hits mid-scenario, that scenario is an error that
+      keeps its finished steps and failures, so a cut-off run can no longer PASS.
+    - A job cancel during setup or cleanup no longer escapes with a traceback.
+      After the first SIGINT/SIGTERM, cleanup and the report always finish.
+  - Offline: `test_live_eval.py` 22 tests, `test_robot_rig.py` 58 tests. Not yet run
+    live against Gemini or on a robot.
 - Desktop offline checks: the people store locks with msvcrt on Windows (fcntl doesn't exist
   there, so every test importing the runtime failed); Linux runners start a PulseAudio server
   so `import sounddevice` works; tests of Linux-only behaviour (/proc startup files, replacing

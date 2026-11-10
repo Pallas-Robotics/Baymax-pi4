@@ -400,7 +400,8 @@ class AudioInputTests(unittest.TestCase):
             '_audio_record_queue': raw_recording, 'audio_queue_mic': microphone,
             '_people': SimpleNamespace(feed_audio=lambda *a: None), '_mic_alignment': SimpleNamespace(fix=lambda block: block), '_gemini_speaking': False, '_playback_buffer': b'',
             'INTERRUPT_RMS_THRESHOLD': 1000, 'sd': SimpleNamespace(InputStream=Stream),
-            'SEND_SAMPLE_RATE': 48000, 'CHUNK_SIZE': 1024})
+            'SEND_SAMPLE_RATE': 48000, 'CHUNK_SIZE': 1024,
+            'device_settings': SimpleNamespace(mic_on=lambda: True)})
         async def run():
             try:
                 await asyncio.wait_for(listen(), .02)
