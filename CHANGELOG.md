@@ -1,5 +1,15 @@
 # MVP (unreleased)
 
+- **OFFLINE Speech — author: natey.** Optional Silero VAD v6 + multilingual
+  Whisper tiny/base CPU-int8 worker, separate from camera/vision/pose processing.
+  Taps existing cleaned audio, bounds queues and decoding, rejects stale/session
+  mismatched work, and aligns local transcripts with captured vision/fall metadata.
+  Explicit model preparation, local-only runtime loading, Monitor events/status,
+  watchdog and shutdown isolation. Off by default; no prompt, Gemini audio/video,
+  fall alert, recording stream, installer or deployment-channel changes. Windows
+  software/native model evidence and pending OPI4 checks are in
+  `docs/features/OFFLINE_SPEECH.md`.
+
 - **Ember for Orange Pi: one repository for the Orange Pi 4 Pro and the Orange Pi 5
   Max.** Made from JoeKojima/Baymax PR #29 (`opi4-demo`), PR #22 (`codex/opi4-flash`),
   the Orange Pi 5 Max branches `orangepi5-npu` + `memory-incremental-saves`,

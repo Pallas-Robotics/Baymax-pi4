@@ -1,0 +1,7 @@
+# Optional OPI4 speech worker; install alongside requirements-orange-pi.txt.
+# No torch, GPU/NPU runtime, capture library or change to the default installer.
+faster-whisper==1.2.1
+ctranslate2==4.6.0
+onnxruntime==1.24.4
+# CTranslate2 4.6 imports pkg_resources, removed in setuptools 81.
+setuptools==80.9.0

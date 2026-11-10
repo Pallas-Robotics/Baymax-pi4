@@ -146,6 +146,8 @@ def snapshot(metrics=None):
         notify('reply_playback_done')
     from features.toolkits.fall_detection import worker as fall_worker
     fall_status = fall_worker.status()
+    from features.offline_speech import worker as offline_speech
+    speech_status = offline_speech.snapshot()
     with lock:
         current = state
         if metrics and metrics.get('playback_bytes', 0) > 0 and current in ('listening', 'thinking', 'speaking'):
@@ -157,7 +159,7 @@ def snapshot(metrics=None):
                 'transcripts': [dict(message) for message in transcripts],
                 'capabilities': {'memory': 'Disabled in version-8 demo', 'google_search': _search_status(),
                                  'toolkit': 'Location, weather and optional experimental fall detection',
-                                 'fall_detection': fall_status}}
+                                 'fall_detection': fall_status, 'offline_speech': speech_status}}
 
 
 def _search_status():
