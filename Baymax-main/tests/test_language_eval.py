@@ -31,6 +31,20 @@ class LanguageEvaluationTests(unittest.TestCase):
         self.assertIn('An explicit request for a response language overrides', prompt)
         self.assertIn('Otherwise, choose from the person\'s latest spoken turn', prompt)
         self.assertIn('Do not wait for another turn, ask permission, or announce the switch', prompt)
+        self.assertIn('A language requested in an earlier turn does not lock later replies', prompt)
+        self.assertNotIn('Honor an explicitly requested ongoing', prompt)
+
+    def test_voice_followup_covers_direct_korean_to_spanish_text_and_audio(self):
+        cases = live_eval.load_scenarios(Path(__file__).parents[1] / 'evals' / 'voice_controls.json')
+        for mode in ('text', 'audio'):
+            case = next(case for case in cases if case['name'] == 'korean-to-spanish-' + mode)
+            live_eval.validate(case)
+            key = 'text' if mode == 'text' else 'say'
+            self.assertIn('Korean', case['steps'][1][key])
+            self.assertIn('하늘', case['steps'][2][key])
+            self.assertIn('hierba', case['steps'][3][key])
+            self.assertNotIn('Spanish', case['steps'][3][key])
+            self.assertEqual(case['steps'][3]['expect']['not_reply'], '[가-힣]')
 
     def setUp(self):
         self.catalog, self.cases = languages.load_inputs()

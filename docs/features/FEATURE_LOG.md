@@ -20,6 +20,8 @@ documented Armbian/clickables installation, not the 4 Pro image.
 Voice follow-up work adds immediate language overrides, bounded wake-listener
 startup and split-result wake phrases. See the candidate record for the
 distinction between source tests, a PR bench installation and owner voice tests.
+The language follow-up removes a conflicting ongoing-preference rule and adds
+direct Korean-to-Spanish text/audio cases; owner speech remains a separate check.
 
 The focused candidate builds on our original `opi4-chat-timing` revision
 `54ee70e`. It ports Joe Kojima's language, weather-cache, quiet-profile and

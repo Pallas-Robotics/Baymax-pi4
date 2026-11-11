@@ -1,5 +1,10 @@
 # MVP (unreleased)
 
+- Language follow-up: remove the sticky ongoing-language preference after owner
+  testing found Spanish input still received Korean replies. Select the language
+  again each turn, including the reply to a switch request itself. Add direct
+  Korean-to-Spanish synthetic text and speech regressions after a Korean request.
+
 - Voice test follow-up: enforce next-reply language selection with explicit
   language overrides; require the voice-volume tool before confirming a change.
   Recognize an "Ember engage" pair split across final recognition results, and

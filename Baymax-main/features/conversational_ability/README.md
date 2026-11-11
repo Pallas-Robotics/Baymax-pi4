@@ -6,9 +6,14 @@
 
 Each reply now follows the latest spoken turn immediately, with explicit reply
 language requests taking precedence. Switch without an acknowledgement or a
-permission question; preserve an explicitly requested ongoing preference.
+permission question. Re-evaluate every user turn: a prior request to speak Korean
+does not lock a later Spanish question to Korean. Answer a request to switch in
+the requested language on that same reply.
 `evals/voice_controls.json` exercises English, Spanish and Korean switching and
-the volume tool with synthetic text, without opening a microphone.
+the volume tool with synthetic text, without opening a microphone. Direct
+Korean-to-Spanish scenarios also use generated speech, with an explicit Korean
+reply request followed by ordinary Korean and Spanish questions. These synthetic
+checks do not establish recognition or playback quality in the owner's room.
 
 Disengage withholds audio from Gemini while the existing cleaned mic frames feed
 the local recognizer. Wake pairs may span two final recognizer results within

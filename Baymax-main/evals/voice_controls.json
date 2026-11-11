@@ -20,5 +20,29 @@
       {"text": "Ember, what color is fresh snow? Answer in Spanish.", "expect": {"reply": "blanc[oa]", "not_reply": "\\b(?:white|sure|switch)\\b", "no_tools": true, "max_words": 40}},
       {"text": "Ember, what color is fresh grass?", "expect": {"reply": "green", "no_tools": true, "max_words": 25}}
     ]
+  },
+  {
+    "name": "korean-to-spanish-text",
+    "about": "Direct Korean to Spanish switching after an explicit Korean reply request; no request to switch precedes the first Spanish question.",
+    "steps": [
+      {"text": "Ember, what color is a ripe banana? Answer briefly.", "expect": {"reply": "yellow", "not_reply": "[가-힣]", "no_tools": true, "max_words": 60}},
+      {"text": "Ember, answer in Korean. What color is fresh snow?", "expect": {"reply": "[가-힣]{2,}", "not_reply": "\\bwhite\\b", "no_tools": true, "max_words": 60}},
+      {"text": "엠버, 하늘은 무슨 색인가요?", "expect": {"reply": "[가-힣]{2,}", "not_reply": "\\bblue\\b", "no_tools": true, "max_words": 60}},
+      {"text": "Ember, ¿de qué color es la hierba?", "expect": {"reply": "verde", "not_reply": "[가-힣]", "no_tools": true, "max_words": 60}},
+      {"text": "Ember, ¿por qué no hablas en español?", "expect": {"reply": "[a-záéíóúñ]{3,}", "not_reply": "[가-힣]", "no_tools": true, "max_words": 60}},
+      {"text": "Ember, what color is the sky?", "expect": {"reply": "blue", "not_reply": "[가-힣]", "no_tools": true, "max_words": 60}}
+    ]
+  },
+  {
+    "name": "korean-to-spanish-audio",
+    "about": "Direct Korean to Spanish switching after an explicit Korean reply request; no request to switch precedes the first Spanish question.",
+    "steps": [
+      {"say": "Ember, what color is a ripe banana? Answer briefly.", "voice": "en", "expect": {"reply": "yellow", "not_reply": "[가-힣]", "no_tools": true, "max_words": 60}},
+      {"say": "Ember, answer in Korean. What color is fresh snow?", "voice": "en", "expect": {"reply": "[가-힣]{2,}", "not_reply": "\\bwhite\\b", "no_tools": true, "max_words": 60}},
+      {"say": "엠버, 하늘은 무슨 색인가요?", "voice": "ko", "expect": {"reply": "[가-힣]{2,}", "not_reply": "\\bblue\\b", "no_tools": true, "max_words": 60}},
+      {"say": "Ember, ¿de qué color es la hierba?", "voice": "es", "expect": {"reply": "verde", "not_reply": "[가-힣]", "no_tools": true, "max_words": 60}},
+      {"say": "Ember, ¿por qué no hablas en español?", "voice": "es", "expect": {"reply": "[a-záéíóúñ]{3,}", "not_reply": "[가-힣]", "no_tools": true, "max_words": 60}},
+      {"say": "Ember, what color is the sky?", "voice": "en", "expect": {"reply": "blue", "not_reply": "[가-힣]", "no_tools": true, "max_words": 60}}
+    ]
   }
 ]

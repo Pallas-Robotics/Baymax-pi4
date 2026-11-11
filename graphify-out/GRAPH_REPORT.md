@@ -3,7 +3,7 @@
 # Graph Report - Baymax  (2026-11-11)
 
 ## Corpus Check
-- 208 files · ~192,864 words
+- 209 files · ~193,880 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 48 file(s) not represented in the graph (top: .service 11, (none) 9, .cmd 7)
 

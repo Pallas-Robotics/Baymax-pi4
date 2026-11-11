@@ -75,6 +75,14 @@ or physical microphone/speaker verification.
 
 The tested source tree is `d36a43e703fb6aa8988da7b4bd8e0755334a986b`.
 See [the follow-up evidence](evidence/voice-controls-20261111.md).
+The owner's next trial found Korean replies to recognized Spanish input.
+The earlier provider scenario switched out of Korean through an explicit Spanish
+request in English, leaving natural Korean-to-Spanish switching uncovered.
+Remove the conflicting ongoing-language preference and select anew each turn.
+New direct text and generated-speech cases include a Korean request, ordinary
+Korean, then Spanish without a switch instruction. See the
+[language follow-up evidence](evidence/korean-spanish-20261111.md) for results
+and remaining human checks.
 Earlier results below describe the original candidate, not these fixes.
 
 Synthetic Gemini evaluation also reproduced a volume-request session close
