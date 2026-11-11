@@ -21,6 +21,7 @@ weather = Weather(location)
 # (location.py); each is fetched again before its copy expires.
 WEATHER_REFRESH_S = 9 * 60
 LOCATION_REFRESH_S = 54 * 60   # every 6th weather refresh
+SEARCH_TOOL_THINKING_BUDGET = 128
 _warm_thread = None
 _warm_stop = threading.Event()  # set only by tests
 
@@ -133,6 +134,11 @@ def extend_config(config):
         # Built-in grounding: Gemini runs the search server-side, no tool_call reaches us.
         tools.append({"google_search": {}})
         result["system_instruction"] += SEARCH_INSTRUCTION
+    if search_enabled() and (result.get("thinking_config") or {}).get("thinking_budget") == 0:
+        # Joe Kojima's d2cca1f compatibility fix: search plus function calls
+        # with zero thinking can close Gemini 2.5 sessions with error 1011.
+        result["thinking_config"] = {**result["thinking_config"],
+                                     "thinking_budget": SEARCH_TOOL_THINKING_BUDGET}
     return experimental.extend_config(result)
 
 

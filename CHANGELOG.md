@@ -1,5 +1,17 @@
 # MVP (unreleased)
 
+- Voice test follow-up: enforce next-reply language selection with explicit
+  language overrides; require the voice-volume tool before confirming a change.
+  Recognize an "Ember engage" pair split across final recognition results, and
+  re-engage with an unavailable notice if the wake worker fails or takes over
+  five seconds to load. Add native-recognizer and synthetic Gemini test cases.
+  Bench installations must pin their PR source in the updater to prevent a
+  reboot from silently returning to a build without volume support.
+  Adapt Joe Kojima's d2cca1f 128-token compatibility setting when Google Search
+  and function tools are enabled with zero thinking; a live volume call
+  reproduced error 1011 at zero, and repeated calls passed at 128. Search stays
+  available; existing nonzero budgets and search-disabled settings are retained.
+
 - OPI4 candidate: adapt Joe Kojima's network retry/resumption changes
   (30c7d7b, 7f21fab, c3deba5) to the existing audio lifecycle, with bounded
   0.3–4.8 second transport retries and nonblocking device-reset delays. Port

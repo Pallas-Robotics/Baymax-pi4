@@ -13,6 +13,14 @@ monitor. Robot v10 supports the same public tools through its adapter. See
 
 ## Conversational web discovery
 
+When built-in search is enabled on Gemini 2.5, an explicitly zero thinking budget
+is raised to 128 tokens, adapting Joe Kojima's `d2cca1f` fix. Zero thinking with
+search plus function tools reproduced a session close on the volume command;
+128 allowed both repeated volume tests to pass while retaining search. Existing
+nonzero budgets are preserved. Search off retains the original budget. This can
+add reasoning latency/quota compared with zero thinking; it does not add another
+session, model or provider.
+
 The existing Gemini Google Search tool can be used without an explicit search
 request when a public topic in an engaged conversation merits a relevant lookup.
 Ember is guided to share one sourced finding, connect it to the person's interest,

@@ -1,6 +1,7 @@
 {
   "name": "conversational_ability",
   "sources": [
+    "Baymax-main/features/toolkits/wakeword.py",
     "Baymax-main/features/conversational_ability/**",
     "Baymax-main/runtime_monitor.py",
     "Baymax-main/static/**"

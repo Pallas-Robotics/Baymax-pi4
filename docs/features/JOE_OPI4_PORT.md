@@ -46,6 +46,45 @@ OPI5/NPU configuration and the separate offline-fall experiment are excluded.
 
 ## Validation
 
+### Owner voice test follow up
+
+The owner reported successful follow-up conversation and generally successful
+rapid Spanish, English and Korean conversation. Volume did not change, waking
+after disengage failed, and language switching sometimes lagged. Investigation
+found the board had returned to its older `e5a4bd7` build, which has no voice
+volume hook, while its uncached wake model was downloading after disengage.
+These observations are not a failed physical test of the currently published
+PR commit. They do expose an unsafe unbounded listener-loading wait.
+
+The follow-up bounds startup at five seconds, reports decoder failures to the
+mic gate, and handles a confident wake pair across adjacent final results.
+It also strengthens immediate per-turn language selection and explicit language
+overrides. No confidence threshold, Gemini model or audio sample rate changes.
+The bench updater must be pinned to this repository's `refs/pull/2/head` with
+automatic updates off; rollback restores the previous updater preferences.
+Family-app integration remains deferred at the owner's request.
+
+Follow-up validation on 2026-11-11 passed the application gate (593 core and
+252 toolkit tests, five documented core skips) and all repository suites
+(887 tests, five skips, no failures/errors). Four synthetic PCM cases passed
+through the real Vosk model on the OPI4: normal and split wake phrases woke;
+the name alone and "Ember disengage" did not. The final Gemini scenarios passed
+2/2 volume runs and 2/2 English/Spanish/Korean switching runs, including an
+explicit Spanish override asked in English. These do not replace owner speech
+or physical microphone/speaker verification.
+
+The tested source tree is `d36a43e703fb6aa8988da7b4bd8e0755334a986b`.
+See [the follow-up evidence](evidence/voice-controls-20261111.md).
+Earlier results below describe the original candidate, not these fixes.
+
+Synthetic Gemini evaluation also reproduced a volume-request session close
+(1011) with built-in search and zero thinking. Adapt Joe Kojima's `d2cca1f`
+compatibility guard: raise an explicitly zero budget to 128 only while search
+is enabled. Two repeated volume scenarios passed with search retained at 128;
+the search-disabled comparison also passed twice. This is a small configuration
+port, not the deferred separate-search-session architecture. It can add reasoning
+latency/tokens relative to zero thinking. Explicit nonzero budgets are preserved.
+
 On 2026-11-10, the isolated OPI4 run used Linux 6.6.98-vendor-sun60iw2 and
 Python 3.12.15, with the installed release's Python environment:
 

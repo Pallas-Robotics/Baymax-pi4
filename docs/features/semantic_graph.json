@@ -2883,6 +2883,18 @@
       "author": null,
       "contributor": null,
       "_origin": "semantic"
+    },
+    {
+      "id": "voice_controls_followup_evidence",
+      "label": "Voice control follow up software and synthetic provider evidence",
+      "file_type": "document",
+      "source_file": "docs/features/evidence/voice-controls-20261111.md",
+      "source_location": "document",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
     }
   ],
   "edges": [
@@ -6415,6 +6427,17 @@
       "confidence_score": 1.0,
       "source_file": "docs/features/JOE_OPI4_PORT.md",
       "source_location": "Scope and source attribution",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "joe_opi4_integration_candidate",
+      "target": "voice_controls_followup_evidence",
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/features/JOE_OPI4_PORT.md",
+      "source_location": "Owner voice test follow up",
       "weight": 1.0,
       "_origin": "semantic"
     }

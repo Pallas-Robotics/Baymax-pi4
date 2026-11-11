@@ -222,6 +222,18 @@ class ToolkitTests(unittest.TestCase):
         self.assertIn("call it directly", declarations["get_weather"])
         self.assertIn("call\nget_weather directly", gemini_tools.INSTRUCTION)
 
+    def test_search_tool_calls_do_not_keep_the_broken_zero_thinking_setting(self):
+        base = {'system_instruction': 'base', 'tools': [], 'thinking_config': {'thinking_budget': 0}}
+        with patch.dict('os.environ', {'BAYMAX_TOOLKIT_ENABLED': '1', 'BAYMAX_GOOGLE_SEARCH': '1'}):
+            result = gemini_tools.extend_config(base)
+            self.assertEqual(result['thinking_config']['thinking_budget'], 128)
+            self.assertTrue(any('google_search' in tool for tool in result['tools']))
+            self.assertEqual(base['thinking_config']['thinking_budget'], 0)
+            configured = {**base, 'thinking_config': {'thinking_budget': 256}}
+            self.assertEqual(gemini_tools.extend_config(configured)['thinking_config']['thinking_budget'],256)
+        with patch.dict('os.environ', {'BAYMAX_TOOLKIT_ENABLED': '1', 'BAYMAX_GOOGLE_SEARCH': '0'}):
+            self.assertEqual(gemini_tools.extend_config(base)['thinking_config']['thinking_budget'],0)
+
     def test_tool_response_keeps_gemini_call_id(self):
         session = SimpleNamespace(send_tool_response=AsyncMock())
         call = SimpleNamespace(function_calls=[SimpleNamespace(name="get_location", id="call-42", args={})])

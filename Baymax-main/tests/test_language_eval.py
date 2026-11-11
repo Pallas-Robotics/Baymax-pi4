@@ -23,6 +23,15 @@ class LanguageEvaluationTests(unittest.TestCase):
         self.assertIn('switch with them on your next reply', prompt)
         self.assertIn('reply in the same mix', prompt)
 
+    def test_language_policy_is_immediate_and_respects_explicit_override(self):
+        _, config = live_eval.mvp_session()
+        prompt = ' '.join(config['system_instruction'].split())
+        self.assertEqual(prompt.count('[LANGUAGE]'), 1)
+        self.assertIn('from the first word of your very next reply', prompt)
+        self.assertIn('An explicit request for a response language overrides', prompt)
+        self.assertIn('Otherwise, choose from the person\'s latest spoken turn', prompt)
+        self.assertIn('Do not wait for another turn, ask permission, or announce the switch', prompt)
+
     def setUp(self):
         self.catalog, self.cases = languages.load_inputs()
         self.case = next(case for case in self.cases if case['name'] == 'es')

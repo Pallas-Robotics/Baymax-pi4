@@ -2,6 +2,30 @@
 
 ## Joe's OPI4 integration candidate
 
+### Voice test follow up
+
+Each reply now follows the latest spoken turn immediately, with explicit reply
+language requests taking precedence. Switch without an acknowledgement or a
+permission question; preserve an explicitly requested ongoing preference.
+`evals/voice_controls.json` exercises English, Spanish and Korean switching and
+the volume tool with synthetic text, without opening a microphone.
+
+Disengage withholds audio from Gemini while the existing cleaned mic frames feed
+the local recognizer. Wake pairs may span two final recognizer results within
+three seconds, retaining the confidence threshold and rejecting isolated names
+and stale pairs. A listener that fails or is still loading after five seconds
+re-engages Ember and reports that disengage is unavailable, rather than leaving
+the user unable to wake it. Prepare the cached Vosk model before a bench test;
+no additional capture stream is opened.
+
+The volume tool must execute before confirming a change or reporting its level.
+Joe Kojima's `d2cca1f` search compatibility setting is adapted so Google Search
+and function tools do not run with the failing zero-thinking configuration.
+Search stays enabled; explicit nonzero budgets stay unchanged.
+The audio callback applies the resulting PCM gain; changing voice wording alone
+does not change volume. Test dispatch, saved level and audio gain together in
+`tests/test_voice_volume.py`.
+
 The candidate ports Joe Kojima's language wording (51f15f1, 2d50ced), network
 backoff (30c7d7b, c3deba5), and untried resume-handle recovery (7f21fab).
 Replies follow words rather than accents or transcript scripts; internal tags

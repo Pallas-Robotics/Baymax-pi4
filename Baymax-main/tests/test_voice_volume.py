@@ -1,13 +1,15 @@
 """Ember's voice volume: the 1-10 level, the voice tool, saving it, and the gain applied
 to Ember's voice on the speaker callback. No device, no Gemini."""
 import json
+import asyncio
 import os
 from pathlib import Path
 import shutil
 import tempfile
 import threading
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -24,6 +26,26 @@ def pcm(*values):
 
 
 class VoiceVolumeTests(unittest.TestCase):
+    def test_live_tool_dispatch_changes_saved_level_and_pcm_gain(self):
+        from features.toolkits import gemini_tools
+        with tempfile.TemporaryDirectory() as directory:
+            control = VoiceVolume(Path(directory) / 'voice_volume.json')
+            session = AsyncMock()
+            with patch.object(volume, 'voice_volume', control):
+                for level in [4, 6]:
+                    call = SimpleNamespace(id=f'volume-{level}', name=volume.NAME, args={'level': level})
+                    asyncio.run(gemini_tools.handle_tool_call(session, SimpleNamespace(function_calls=[call])))
+                    response = session.send_tool_response.call_args.kwargs['function_responses'][0]
+                    self.assertEqual(response.response['level'], level)
+                    self.assertEqual(json.loads(control.path.read_text())['level'], level)
+                    block = pcm(*([1000] * 480))
+                    control.apply(block)  # Finish the gain ramp before comparing blocks.
+                    amplitude = np.frombuffer(control.apply(block),dtype=np.int16).mean()
+                    if level == 4:
+                        quiet = amplitude
+                    else:
+                        self.assertGreater(amplitude,quiet * 1.4)
+
     def setUp(self):
         self.dir = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.dir, ignore_errors=True)

@@ -17,6 +17,10 @@ documented Armbian/clickables installation, not the 4 Pro image.
 
 ## Joe's OPI4 integration candidate
 
+Voice follow-up work adds immediate language overrides, bounded wake-listener
+startup and split-result wake phrases. See the candidate record for the
+distinction between source tests, a PR bench installation and owner voice tests.
+
 The focused candidate builds on our original `opi4-chat-timing` revision
 `54ee70e`. It ports Joe Kojima's language, weather-cache, quiet-profile and
 network-retry changes, with OPI4-specific profile retry handling. See
