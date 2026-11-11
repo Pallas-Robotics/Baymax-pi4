@@ -60,6 +60,7 @@ from google.genai import types
 import runtime_monitor as monitor
 from features.toolkits.fall_detection import worker as fall_worker
 from features.device_settings import settings as device_settings  # mic / camera / volume from the Ember app
+from features.toolkits.family import reports as family_reports
 from dotenv import load_dotenv
 from semantic_embedder import SemanticEmbedder, download_model, missing_packages, model_present
 
@@ -2255,6 +2256,7 @@ class _TurnTranscript:
         if text:
             _notify_webapp("/api/transcript", {"speaker": self.speaker, "text": text})
             voice_choice.choice.remember_turn(self.speaker, text)   # recap for a voice change (RAM)
+            family_reports.record(self.speaker, text)  # robot-only journal for the family's daily report
 
 
 async def receive_audio(session):

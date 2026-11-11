@@ -211,14 +211,15 @@ class ToolkitAndRuntimeTests(unittest.TestCase):
         self.assertIn(voice_choice.session_task, session_tasks)
 
     def test_transcripts_feed_the_recap(self):
-        fake = Mock()
-        cls = load_function("_TurnTranscript", {"_notify_webapp": Mock(),
+        fake, journal = Mock(), Mock()
+        cls = load_function("_TurnTranscript", {"_notify_webapp": Mock(), "family_reports": journal,
                                                 "voice_choice": Mock(choice=fake)})
         said = cls("user")
         said.add("Hel")
         said.add("lo there")
         said.flush()
         fake.remember_turn.assert_called_once_with("user", "Hello there")
+        journal.record.assert_called_once_with("user", "Hello there")   # the family's daily report too
 
     def test_runtime_moves_to_a_fresh_session_at_a_quiet_moment(self):
         """between_turns: a pending voice change ends this connection once it's quiet,

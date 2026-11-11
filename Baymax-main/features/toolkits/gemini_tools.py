@@ -122,7 +122,7 @@ def extend_config(config):
     if everyday.enabled():
         result["system_instruction"] += everyday.INSTRUCTION
     if family.enabled():
-        result["system_instruction"] += family.INSTRUCTION
+        result["system_instruction"] += family.INSTRUCTION + family.report_section()
     if look_closely.enabled():
         result["system_instruction"] += look_closely.INSTRUCTION
     if listen.enabled():
