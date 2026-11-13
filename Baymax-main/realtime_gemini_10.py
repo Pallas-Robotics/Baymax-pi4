@@ -74,6 +74,7 @@ from features.toolkits import gemini_tools as public_toolkit
 from features.toolkits.proactive import proactive as _proactive  # startup greeting waits for video
 from features.person_recognition.people import people as _people  # faces + voices
 from features.person_recognition import people as person_recognition
+from features.conversational_ability import session as conversation_session
 
 # Load API Key
 load_dotenv()
@@ -2265,6 +2266,7 @@ class _TurnTranscript:
             _notify_webapp("/api/transcript", {"speaker": self.speaker, "text": text})
             voice_choice.choice.remember_turn(self.speaker, text)   # recap for a voice change (RAM)
             family_reports.record(self.speaker, text)  # robot-only journal for the family's daily report
+            conversation_session.note_turn(self.speaker, text)  # recap if Gemini must start fresh
 
 
 async def receive_audio(session):
@@ -2799,6 +2801,21 @@ def _run_voice_analysis():
 
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
+async def _stay_disconnected():
+    """Mic and camera are both off in the Ember app, so Ember sends Gemini nothing and
+    Gemini closes the session after ~2 min. Rather than reconnect every 2 min, wait until
+    one is back on, or until a reminder or family message is due (that session idles
+    out again afterwards). The next connection resumes or recaps the conversation."""
+    print("[SESSION] Microphone and camera are off: staying disconnected from Gemini until one is "
+          "turned back on or a reminder or message is due.", flush=True)
+    monitor.emit("paused", "Microphone and camera are off in the Ember app")
+    _boot_status("ready", "Ember is ready. Microphone and camera are off in the Ember app.", ready=True)
+    while not _shutdown_event.is_set() and device_settings.nothing_to_send():
+        if await asyncio.to_thread(public_toolkit.has_something_to_say):
+            break
+        await asyncio.sleep(2)
+
+
 async def run():
     global _last_robot_speech_ts, _stop_started_ts, _go_away_at, _connected_at, _startup_files_noted
     monitor.start(lambda: {"playback_bytes": len(_playback_buffer), "gemini_generating_audio": _gemini_speaking, "audio_input": dict(_audio_enhancer.metrics) if _audio_enhancer is not None else None})
@@ -2811,6 +2828,8 @@ async def run():
         started, set_up = time.monotonic(), False
         model = _live_models.current
         try:
+            if device_settings.nothing_to_send() and not await asyncio.to_thread(public_toolkit.has_something_to_say):
+                await _stay_disconnected()
             monitor.finish_transcripts()
             monitor.emit("connecting", "Connecting to Gemini Live")
             print(f"Connecting to {model}...")
@@ -2821,10 +2840,18 @@ async def run():
             ) as live_session:
                 set_up = True
                 live_session = _address_gate.watch(live_session)  # notes Ember's own messages
+                conversation_session.connected()
                 print("Connected. System ready.")
                 if not _startup_files_noted:  # once a run: what to read into memory early next boot
                     _startup_files_noted = True
                     threading.Thread(target=pc_hardware.note_startup_files, args=("ember",), daemon=True).start()
+                if not conversation_session.resuming():
+                    recap = conversation_session.recap()
+                    if recap:
+                        # Fresh start (resume impossible): Ember still knows what was just said.
+                        await live_session.send_client_content(
+                            turns={"role": "user", "parts": [{"text": recap}]}, turn_complete=False)
+                        print(f"[SESSION] Fresh connection: recapped {recap.count(chr(10))} recent turns.", flush=True)
                 monitor.emit("listening", "Connected to Gemini; listening")
                 _boot_status("ready", "Baymax is ready.", ready=True)
                 print("=" * 70)
@@ -2879,6 +2906,7 @@ async def run():
                         _shutdown_event.set()
                         raise
                 finally:
+                    conversation_session.ended()
                     _abandon_reply()
                     _abort_connection(live_session)
                     output_stream.stop()
@@ -2895,9 +2923,14 @@ async def run():
             pause, quick_failures = _reconnect_plan(e, time.monotonic() - started, quick_failures)
             if pause is not None:
                 # Gemini's routine reset or a lost connection: the audio devices are fine.
-                if pause:
+                if device_settings.nothing_to_send():
+                    # Nothing was being sent, so Gemini closed the idle session (about every
+                    # 2 min); the loop above then stays disconnected instead of reconnecting.
+                    print("[SESSION] Gemini closed the idle session (microphone and camera are off).", flush=True)
+                elif pause:
                     print(f"[SESSION] Connection to Gemini lost ({reason}); reconnecting in {pause:.1f} s.",
                           flush=True)
+                if pause:
                     await asyncio.sleep(pause)
                 continue
             print(f"connection failed {reason}. retrying...")

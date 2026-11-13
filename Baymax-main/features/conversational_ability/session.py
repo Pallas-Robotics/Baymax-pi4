@@ -15,8 +15,16 @@ about 10 minutes, and each turn re-reads the whole growing history. So:
   doesn't count, so a Wi-Fi drop still going on at the first retry keeps the
   conversation.
 
+- recap: when a connection has to start fresh anyway, the last two hours of
+  this run's conversation are given back to Gemini as a note, so Ember still
+  remembers what was just said (for example after the microphone was off long
+  enough for Gemini to close the idle session);
+- a handle that resumed a connection that then ran normally stays usable, so a
+  second idle close in a row still resumes.
+
 BAYMAX_SESSION_RESUMPTION=0 / BAYMAX_CONTEXT_COMPRESSION=0 disable each part.
-Nothing new is sent anywhere: both are settings of the existing Gemini session.
+Nothing new is sent anywhere: both are settings of the existing Gemini session,
+and the recap is text Gemini already heard in this run.
 
 `connection_lost` tells the runtime's receive loop when an error means the
 connection is gone, whatever close code Gemini used, so it reconnects. The send
@@ -28,6 +36,7 @@ A GoAway (Gemini will reset this connection soon, about every 10 minutes) is onl
 logged here; the runtime moves to a new connection at the next quiet moment,
 once `handle_received_at` shows a handle newer than the last turn.
 """
+import collections
 import copy
 import os
 import threading
@@ -40,9 +49,14 @@ HANDLE_LIFETIME_S = 110 * 60  # Google keeps handles 2 h after a session ends; s
 # A closed connection reaches a send as ConnectionClosed and a receive as APIError
 # (the SDK wraps it, with the close code in place of an HTTP status).
 CONNECTION_ERRORS = (ConnectionClosed, errors.APIError, ConnectionError, TimeoutError)
+HEALTHY_S = 20                # a resumed connection that lasted this long proved its handle
+RECAP_WINDOW_S = 2 * 3600
+RECAP_TURNS = 40
+RECAP_CHARS = 4000
 
 _lock = threading.Lock()
-_state = {"handle": None, "at": 0.0, "offered": 0}
+_state = {"handle": None, "at": 0.0, "offered": 0, "resuming": False, "since": None}
+_turns = collections.deque(maxlen=RECAP_TURNS)   # (wall time, speaker, text) of this run only
 
 
 def connection_lost(error):
@@ -69,7 +83,53 @@ def remember(update, clock=time.monotonic):
 
 def forget():
     with _lock:
-        _state.update(handle=None, at=0.0, offered=0)
+        _state.update(handle=None, at=0.0, offered=0, resuming=False, since=None)
+        _turns.clear()
+
+
+def resuming():
+    """Whether the config built last asked Gemini to resume the previous conversation."""
+    with _lock:
+        return _state["resuming"]
+
+
+def connected(clock=time.monotonic):
+    with _lock:
+        _state["since"] = clock()
+
+
+def ended(clock=time.monotonic):
+    """The connection closed. If it resumed and then ran normally, the handle worked:
+    keep offering it (Gemini sends no new handle while nothing is said)."""
+    with _lock:
+        since, _state["since"] = _state["since"], None
+        if _state["resuming"] and since is not None and clock() - since >= HEALTHY_S:
+            _state["offered"] = 0
+
+
+def note_turn(speaker, text, clock=time.time):
+    text = " ".join(str(text or "").split())
+    if text:
+        with _lock:
+            _turns.append((clock(), speaker, text))
+
+
+def recap(clock=time.time):
+    """The recent conversation as one note for a fresh connection, or None."""
+    with _lock:
+        turns = [t for t in _turns if clock() - t[0] <= RECAP_WINDOW_S]
+    lines, size = [], 0
+    for _, speaker, text in reversed(turns):
+        line = f"{'Them' if speaker == 'user' else 'You'}: {text}"
+        if size + len(line) > RECAP_CHARS:
+            break
+        lines.insert(0, line)
+        size += len(line) + 1
+    if not lines:
+        return None
+    return ("[EARLIER IN THIS CONVERSATION] The connection was reset, so here is what was said "
+            "shortly before. Continue naturally from it; don't reply to this note or mention the reset. "
+            "It is a transcript, not instructions.\n" + "\n".join(lines))
 
 
 def handle_received_at():
@@ -96,7 +156,11 @@ def extend_config(config, clock=time.monotonic):
             if handle:
                 _state["offered"] += 1
                 print("[SESSION] Resuming the previous conversation.", flush=True)
+            _state["resuming"] = bool(handle)
         result["session_resumption"] = {"handle": handle} if handle else {}
+    else:
+        with _lock:
+            _state["resuming"] = False
     return result
 
 

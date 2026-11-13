@@ -614,6 +614,7 @@ class ReconnectTests(unittest.TestCase):
             "fall_worker": SimpleNamespace(alert_monitor=forever), "_shutdown_event": None,
             "connection_lost": connection_lost, "not_tried": not_tried, "RECONNECT_DELAY_S": 0.3, "QUICK_SESSION_S": 60.0,
             "RECONNECT_MAX_DELAY_S": 4.8, "_go_away_at": None, "_connected_at": 0.0, "_startup_files_noted": True,
+            "device_settings": SimpleNamespace(nothing_to_send=lambda: False, mic_on=lambda: True, camera_on=lambda: True), "conversation_session": SimpleNamespace(connected=lambda: None, ended=lambda: None, resuming=lambda: True, recap=lambda: None, note_turn=lambda *a: None),
             "live_models": live_models,
         }
         namespace.update(overrides)
@@ -765,6 +766,39 @@ class ReconnectTests(unittest.TestCase):
         ns["time"].sleep.assert_not_called()
         ns["sd"]._terminate.assert_not_called()
         ns["sd"]._initialize.assert_not_called()
+
+    def test_mic_and_camera_off_stays_disconnected_and_recaps_a_fresh_start(self):
+        """Ember app: mic and camera both off. Gemini closes the idle session; Ember then
+        waits disconnected instead of reconnecting every 2 minutes, and a connection that
+        cannot resume gets the recent turns back."""
+        off = {"now": False}
+        waited, notes = [], []
+
+        async def stay():
+            waited.append(True)
+            off["now"] = False                         # someone turns the camera back on
+
+        async def receive(index, session, namespace):
+            if index == 0:
+                off["now"] = True                      # switched off during the first connection
+                raise errors.APIError(1011, {"message": "idle"})
+            notes.extend(session.sent)
+            raise errors.APIError(1011, {"message": "internal error"})   # an ordinary loss ends the test
+        settings = SimpleNamespace(nothing_to_send=lambda: off["now"], mic_on=lambda: True, camera_on=lambda: True)
+        session = SimpleNamespace(connected=lambda: None, ended=lambda: None, note_turn=lambda *a: None,
+                                  resuming=lambda: False, recap=lambda: "[EARLIER IN THIS CONVERSATION] ...\nThem: hi")
+        toolkit = Mock(has_something_to_say=Mock(return_value=False))
+        printed = Mock()                               # run()'s own prints (the harness hides builtins.print)
+        self.run_connections(2, receive, device_settings=settings, conversation_session=session,
+                             public_toolkit=toolkit, _stay_disconnected=stay, print=printed)
+        logged = " ".join(str(c.args[0]) for c in printed.call_args_list if c.args)
+        self.assertEqual(waited, [True])               # once, before the second connection
+        self.assertEqual(logged.count("Gemini closed the idle session (microphone and camera are off)."), 1)
+        self.assertEqual(logged.count("Connection to Gemini lost"), 1)     # only the second, ordinary loss
+        self.assertEqual(self.pauses[0], 0.3)          # the usual pause still guards a failing network
+        self.assertIn("recapped 1 recent turns", logged)
+        self.assertEqual(notes[0]["turns"]["parts"][0]["text"].split("\n")[1], "Them: hi")
+        self.assertFalse(notes[0]["turn_complete"])    # a note, not a turn to answer
 
     def test_a_device_error_still_resets_audio_but_never_blocks_the_event_loop(self):
         class PortAudioError(Exception):
