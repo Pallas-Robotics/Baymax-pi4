@@ -61,6 +61,7 @@ from semantic_embedder import SemanticEmbedder, download_model, missing_packages
 from fall_detection.detector import FallDetector
 import device_config
 from features import persona
+from features.conversational_ability import voice_choice
 # MVP (#15) toolkits: location/weather, everyday tasks, audiobooks, eyes, public tools.
 from features.toolkits import gemini_tools as public_toolkit
 
@@ -1834,6 +1835,48 @@ class _TurnTranscript:
         self._parts.clear()
         if text:
             _notify_webapp("/api/transcript", {"speaker": self.speaker, "text": text})
+            voice_choice.choice.remember_turn(self.speaker, text)   # recap for a voice change (RAM)
+
+
+# ─── Changing Ember's voice ──────────────────────────────────────────────────
+VOICE_SWITCH_QUIET_S = 1.5    # nobody talking for this long before the switch
+VOICE_SWITCH_REPLY_WAIT_S = 8.0   # Ember's "switching now" line, or this long without one
+
+
+class _VoiceSwitch(Exception):
+    """Ends this connection so the next one starts with the newly chosen voice."""
+
+
+def _voice_switch_ready(now, requested_at):
+    """Ember has said its "switching now" line (or VOICE_SWITCH_REPLY_WAIT_S passed), it has
+    finished playing, and nobody is talking."""
+    with _gemini_speaking_lock:
+        speaking = _gemini_speaking
+    with _playback_lock:
+        buffered = len(_playback_buffer) > 0
+    with _initiation_ts_lock:
+        heard = max(_last_loud_mic_ts, _last_user_speech_ts)
+        spoke = _last_robot_speech_ts
+    replied = spoke > requested_at or now - requested_at >= VOICE_SWITCH_REPLY_WAIT_S
+    return replied and not speaking and not buffered and now - heard >= VOICE_SWITCH_QUIET_S
+
+
+async def voice_switch_monitor(session, poll=0.25):
+    """A voice change someone asked for (voice_choice.py): Gemini keeps a session's voice
+    even when it is resumed, so at a quiet moment this ends the connection after dropping
+    the resume handle; the next one starts fresh with the new voice and a recap of the
+    conversation in its instructions."""
+    from features.conversational_ability.voice_choice import choice
+    while True:
+        await asyncio.sleep(poll)
+        if not choice.switch_due() or not _voice_switch_ready(time.monotonic(), choice.requested_at or 0.0):
+            continue
+        change = choice.start_switch()
+        if change:
+            from features.conversational_ability.session import forget
+            forget()
+            print(f"[VOICE] Quiet moment: new session with the {change[1]} voice (was {change[0]}).", flush=True)
+            raise _VoiceSwitch()
 
 
 async def receive_audio(session):
@@ -2416,6 +2459,7 @@ async def run():
                         tg.create_task(send_video_realtime(live_session))
                         tg.create_task(receive_audio(live_session))
                         tg.create_task(fall_alert_monitor(live_session))
+                        tg.create_task(voice_switch_monitor(live_session))
                         if RANDOM_INITIATION_ENABLED:
                             tg.create_task(initiation_monitor(live_session))
                         # MVP session tasks: reminder delivery, greetings, audiobook notes.
@@ -2443,6 +2487,8 @@ async def run():
                     if not _shutdown_event.is_set():
                         await asyncio.sleep(2)
         except Exception as e:
+            if isinstance(e, BaseExceptionGroup) and all(isinstance(x, _VoiceSwitch) for x in e.exceptions):
+                continue   # a voice change: reconnect at once, the audio devices are fine
             print(f"connection failed {e}. retrying...")
             _boot_status("connecting", f"Connection failed: {e}", error=True)
             # Reset PortAudio to recover from ALSA/PipeWire device errors

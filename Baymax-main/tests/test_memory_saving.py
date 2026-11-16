@@ -495,6 +495,7 @@ class TeardownTests(unittest.TestCase):
               "_shutdown_event": threading.Event(), "start_output_stream": Mock,
               "listen_audio": forever, "send_audio_realtime": forever, "send_video_realtime": forever,
               "receive_audio": forever, "fall_alert_monitor": forever, "initiation_monitor": forever,
+              "voice_switch_monitor": forever,
               "fall_worker": SimpleNamespace(alert_monitor=forever), "monitor_queues": forever,
               # The reconnect fix's per-session steps (tested in test_v10_runtime.ReconnectTests).
               "_send_cut_off_prompts": forever, "_abandon_reply": Mock(), "_abort_connection": Mock()}

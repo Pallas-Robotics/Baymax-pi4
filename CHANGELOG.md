@@ -1,5 +1,24 @@
 # MVP (unreleased)
 
+- People can choose Ember's voice by asking ("Ember, can you use a deeper voice?", "go
+  back to your usual voice"): the `change_voice` tool picks one of Gemini's 30
+  prebuilt voices from a catalogue grouped by measured pitch, saves it
+  (`ember_voice.json`; `BAYMAX_VOICE` stays the usual voice) and Ember moves to it at the
+  next quiet moment. Gemini keeps a resumed session's voice, so the switch starts a fresh
+  session (no PortAudio reset) whose instructions carry the last turns, and Ember tries
+  the new voice out loud. Live check with this branch's config and tool code (2.5,
+  2026-11-15): "a man's voice" chose Algieba (about 230 Hz to 66-120 Hz), Ember still knew
+  what had just been said, and "your usual voice" switched back. `BAYMAX_VOICE_CHOICE=0`
+  turns the tool off. Tests: `tests/test_voice_choice.py`
+  (features/conversational_ability/README.md, "Choosing Ember's voice").
+
+- Ember has more personality: `[YOUR PERSONALITY]`, a lively `[YOUR VOICE]` (it was
+  calm, soft, "not cheerful by default") and `[YOUR FLAIR]` (a real reaction instead of a
+  stock opener, one spark per reply, no jokes about pain or grief). Blind A/B of 8
+  scripted conversations with this branch's config on gemini-2.5: flair 3.3 to
+  7.9, appropriateness 7.9 to 8.1, the new persona preferred 8 of 8
+  (features/conversational_ability/README.md, "Ember's personality").
+
 - **Ember for Orange Pi: one repository for the Orange Pi 4 Pro and the Orange Pi 5
   Max.** Made from JoeKojima/Baymax PR #29 (`opi4-demo`), PR #22 (`codex/opi4-flash`),
   the Orange Pi 5 Max branches `orangepi5-npu` + `memory-incremental-saves`,

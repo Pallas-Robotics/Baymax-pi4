@@ -86,7 +86,7 @@ class ToolkitTests(unittest.TestCase):
 
     def test_disabled_toolkit_preserves_original_config(self):
         # The eye and voice-volume tools are core (they stay with the toolkit off): off here.
-        with patch.dict('os.environ', {"BAYMAX_TOOLKIT_ENABLED": "0", "BAYMAX_VOICE_VOLUME_TOOL": "0"}), \
+        with patch.dict('os.environ', {"BAYMAX_TOOLKIT_ENABLED": "0", "BAYMAX_VOICE_CHOICE": "0", "BAYMAX_VOICE_VOLUME_TOOL": "0"}), \
                 patch.object(gemini_tools.monitor, 'eye_expression_handler', None):
             config = {"system_instruction": "base"}
             result = gemini_tools.extend_config(config)

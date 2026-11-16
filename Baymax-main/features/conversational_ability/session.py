@@ -63,6 +63,13 @@ def forget():
         _state.update(handle=None, at=0.0, offered=0)
 
 
+def handle_received_at():
+    """When the newest resumable handle arrived (the clock `remember` used,
+    time.monotonic() in the runtime), or None without one."""
+    with _lock:
+        return _state["at"] if _state["handle"] else None
+
+
 def extend_config(config, clock=time.monotonic):
     result = copy.deepcopy(config)
     if os.getenv("BAYMAX_CONTEXT_COMPRESSION", "1") != "0":
