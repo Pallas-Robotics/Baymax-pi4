@@ -1,5 +1,13 @@
 # MVP (unreleased)
 
+- From the LattePanda line (JoeKojima/Baymax `mvp-v10`, James), now on the Orange Pi 4 Pro:
+  microphone, camera and speaker volume from the Ember app; daily conversation reports for
+  the family with a preview on request; staying disconnected while mic and camera are both
+  off, with a recap after a fresh start; and opening a conversation only once until the
+  person replies. Each has its own entry below. Adapted to this line: the camera switch
+  closes the pose process (and so face recognition), the video sender keeps its cold-boot
+  wait and first-frame-at-once, and the idle close goes through the reconnect loop without
+  an audio reset.
 - With the microphone and camera both off in the Ember app, Ember now stays
   disconnected from Gemini instead of reconnecting every two minutes. Ember sends
   Gemini nothing then, so Gemini closed the idle session about every two minutes
