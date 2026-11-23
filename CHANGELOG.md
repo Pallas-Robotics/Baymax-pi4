@@ -109,6 +109,8 @@
       After the first SIGINT/SIGTERM, cleanup and the report always finish.
   - Offline: `test_live_eval.py` 22 tests, `test_robot_rig.py` 58 tests. Not yet run
     live against Gemini or on a robot.
+- Offline checks run only on the Orange Pi (Linux ARM64) for now; the Linux, Windows and
+  macOS desktop runs are off until local development is a priority again.
 - Desktop offline checks: the people store locks with msvcrt on Windows (fcntl doesn't exist
   there, so every test importing the runtime failed); Linux runners start a PulseAudio server
   so `import sounddevice` works; tests of Linux-only behaviour (/proc startup files, replacing
