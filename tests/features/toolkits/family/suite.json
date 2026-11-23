@@ -4,13 +4,15 @@
     "Baymax-main/features/toolkits/family/**",
     "Baymax-main/features/toolkits/everyday/store.py",
     "Baymax-main/features/conversational_ability/live_models.py",
-    "Baymax-main/features/toolkits/fall_detection.py"
+    "Baymax-main/features/toolkits/fall_detection.py",
+    "Baymax-main/features/device_settings.py"
   ],
   "python": [
     {
       "directory": "Baymax-main/tests",
       "patterns": [
-        "test_toolkit_family.py"
+        "test_toolkit_family.py",
+        "test_family_reports.py"
       ]
     }
   ]

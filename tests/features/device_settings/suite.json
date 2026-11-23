@@ -6,14 +6,16 @@
     "Baymax-main/dev_settings.py",
     "Baymax-main/pc_hardware.py",
     "Baymax-main/macos_devices.py",
-    "Baymax-main/secret_config.py"
+    "Baymax-main/secret_config.py",
+    "Baymax-main/features/device_settings.py"
   ],
   "python": [
     {
       "directory": "Baymax-main/tests",
       "patterns": [
-        "test_devUI_http.py",
         "test_dev_settings.py",
+        "test_device_settings.py",
+        "test_devUI_http.py",
         "test_macos_devices.py",
         "test_pc_hardware.py",
         "test_secret_config.py"
