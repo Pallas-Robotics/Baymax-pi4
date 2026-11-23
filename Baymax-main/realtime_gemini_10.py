@@ -59,6 +59,8 @@ from google import genai
 from google.genai import types
 import runtime_monitor as monitor
 from features.toolkits.fall_detection import worker as fall_worker
+from features.device_settings import settings as device_settings  # mic / camera / volume from the Ember app
+from features.toolkits.family import reports as family_reports
 from dotenv import load_dotenv
 from semantic_embedder import SemanticEmbedder, download_model, missing_packages, model_present
 
@@ -72,6 +74,7 @@ from features.toolkits import gemini_tools as public_toolkit
 from features.toolkits.proactive import proactive as _proactive  # startup greeting waits for video
 from features.person_recognition.people import people as _people  # faces + voices
 from features.person_recognition import people as person_recognition
+from features.conversational_ability import session as conversation_session
 
 # Load API Key
 load_dotenv()
@@ -670,6 +673,7 @@ _mic_status = ""                          # the latest one; monitor_queues print
 _mic_statuses_shown = 0                   # how many of them monitor_queues has reported
 _mic_alignment = pc_hardware.MicByteAlignment()   # realigns a mic stream that slipped a byte
 _mic_alignment_shown = 0                  # its shifts monitor_queues has reported
+_last_initiation_ts = 0.0                 # last time the robot opened a conversation itself
 _initiation_ts_lock = threading.Lock()
 
 # ─── Audio recording for voice biomarker analysis ───────────────────────────
@@ -1382,7 +1386,25 @@ def _update_face_visibility(landmarks):
 
 # ─── Fall Detection Thread ──────────────────────────────────────────────────
 def _fall_detection_thread():
-    """Runs in a dedicated thread.  Captures camera frames, has pose run in its own
+    """Owns the camera for the whole run. It is open only while the Ember app
+    allows it (device_settings): switched off, the camera is released and the
+    pose process closed, so there is no fall detection, no MJPEG stream and no
+    video to Gemini. Switched on again, it starts over."""
+    while device_settings.wait_for_camera(_shutdown_event):
+        _camera_session()
+        if _shutdown_event.is_set():
+            break
+        if device_settings.camera_on():
+            # No camera found, or the session failed: as before, don't keep
+            # retrying; switching the camera off and on in the app tries again.
+            while device_settings.camera_on() and not _shutdown_event.wait(1):
+                pass
+        if not device_settings.camera_on():
+            print("[CAM] Camera off from the Ember app: released; no fall detection, stream or video to Gemini.", flush=True)
+
+
+def _camera_session():
+    """One camera run.  Captures camera frames, has pose run in its own
     process (_open_pose: the RK3588 NPU or MediaPipe on the CPU), draws visual
     overlays and shares frames with the Gemini video sender and the MJPEG stream,
     and runs fall detection.  The pose landmarks are also used for face presence
@@ -1474,7 +1496,7 @@ def _fall_detection_thread():
                 landmarker = _open_pose(force_cpu=True)
                 if landmarker is None:
                     print(video_only, flush=True)
-        while not _shutdown_event.is_set():
+        while not _shutdown_event.is_set() and device_settings.camera_on():
             t0 = time.monotonic()
 
             ret, frame = cap.read()
@@ -1585,7 +1607,10 @@ def _fall_detection_thread():
             _latest_frame = None  # Gemini gets no frozen picture once the camera stops.
         cap.release()
         fall_worker.stop()
-        print("[FALL] Fall detection thread stopped.")
+        # Nothing stale may reach the stream either once the camera is off.
+        with _annotated_frame_lock:
+            _annotated_frame = None
+        print("[FALL] Camera released; fall detection stopped.")
 
 
 # ─── Static / crackle noise suppression ─────────────────────────────────────
@@ -1738,6 +1763,8 @@ async def listen_audio():
     #           flush=True)
 
     def audio_callback(indata, frames, time_info, status):
+        if not device_settings.mic_on():
+            return  # Microphone off from the Ember app: nothing is heard, sent, recorded or analysed.
         global _last_loud_mic_ts, _mic_level, _mic_status, _mic_statuses
         if status:
             # monitor_queues reports it, like the level: a flushed print here, on PortAudio's
@@ -1864,32 +1891,32 @@ def _encode_video_frame(frame):
     return buffer.tobytes()
 
 async def send_video_realtime(session):
-    """Reads shared frames from the fall detection thread and sends to Gemini every 3s."""
+    """Reads shared frames from the fall detection thread and sends to Gemini every 3s.
+
+    Sends nothing while there are no frames: no camera, the camera switched off from
+    the Ember app (the camera thread clears the frame when it stops), or a cold Orange
+    Pi 4 Pro boot, where the camera thread shares nothing until the pose process has
+    loaded (5+ s). A session's first frame goes as soon as there is one, so the startup
+    greeting can see the room."""
     loop = asyncio.get_running_loop()
-    # Wait for the fall detection thread's first frame. On a cold Orange Pi 4 Pro boot the
-    # camera thread shares nothing until the pose process has loaded (5+ s), and giving up
-    # after 5 s left Gemini blind until the next reconnect. A board with no camera just polls.
-    waited = 0
-    while True:
-        with _latest_frame_lock:
-            if _latest_frame is not None:
-                break
-        if waited == 50:
-            print("[VIDEO] No camera frames yet; video starts when the camera does.")
-        waited += 1
-        await asyncio.sleep(0.1 if waited < 300 else 2.0)
-
-    print("[VIDEO] Sending shared camera frames to Gemini (1 frame / 3s).")
-
+    sending = None
     first = True
+    waited = 0
     while True:
         if not first:  # the first frame goes at once, so the startup greeting can see the room
             await asyncio.sleep(3.0)
         t0 = time.perf_counter()
 
         with _latest_frame_lock:
-            frame = _latest_frame
+            frame = _latest_frame if device_settings.camera_on() else None
+        if (frame is not None) != sending:
+            sending = frame is not None
+            print("[VIDEO] Sending shared camera frames to Gemini (1 frame / 3s)." if sending
+                  else "[VIDEO] No camera frames (camera off or unavailable) — no video to Gemini.")
         if frame is None:
+            if first:  # still waiting for this session's first frame: look again soon
+                waited += 1
+                await asyncio.sleep(0.1 if waited < 300 else 2.0)
             continue
 
         jpg_bytes = await loop.run_in_executor(None, _encode_video_frame, frame)
@@ -2144,8 +2171,11 @@ async def initiation_monitor(session):
     if RESET_IDLE_ON_USER_SPEECH, user silence too). While the user's face is
     visible it evaluates the precomputed coin table once per tick; a fired coin
     latches a pending intent that emits at the next gate-clear moment. The
-    face-presence clock resets after FACE_ABSENCE_RESET_SECONDS of no face."""
-    global _last_robot_speech_ts
+    face-presence clock resets after FACE_ABSENCE_RESET_SECONDS of no face.
+
+    Ember opens a conversation only once: if nobody answers that opener, it
+    stays quiet until the user speaks, rather than trying again every idle window."""
+    global _last_robot_speech_ts, _last_initiation_ts
 
     clock_start = None        # monotonic time the face-presence clock started (or None)
     last_eval_ts = 0.0        # last time a coin was rolled
@@ -2160,8 +2190,10 @@ async def initiation_monitor(session):
             idle_since = _last_robot_speech_ts
             if RESET_IDLE_ON_USER_SPEECH:
                 idle_since = max(idle_since, _last_user_speech_ts)
-        if (now - idle_since) < IDLE_THRESHOLD_SECONDS:
-            # Not idle → not in initiation mode. Reset the machine.
+            unanswered = _last_user_speech_ts < _last_initiation_ts
+        if unanswered or (now - idle_since) < IDLE_THRESHOLD_SECONDS:
+            # Not idle, or our last opener is still unanswered → not in
+            # initiation mode. Reset the machine.
             clock_start = None
             pending_fire = False
             continue
@@ -2189,6 +2221,7 @@ async def initiation_monitor(session):
                 await _fire_initiation(session)
                 with _initiation_ts_lock:
                     _last_robot_speech_ts = now   # arm the next idle window
+                    _last_initiation_ts = now     # no more openers until they reply
                 clock_start = None
                 pending_fire = False
             continue
@@ -2207,6 +2240,7 @@ async def initiation_monitor(session):
                     await _fire_initiation(session)
                     with _initiation_ts_lock:
                         _last_robot_speech_ts = now
+                        _last_initiation_ts = now
                     clock_start = None
                     pending_fire = False
 
@@ -2231,6 +2265,8 @@ class _TurnTranscript:
         if text:
             _notify_webapp("/api/transcript", {"speaker": self.speaker, "text": text})
             voice_choice.choice.remember_turn(self.speaker, text)   # recap for a voice change (RAM)
+            family_reports.record(self.speaker, text)  # robot-only journal for the family's daily report
+            conversation_session.note_turn(self.speaker, text)  # recap if Gemini must start fresh
 
 
 async def receive_audio(session):
@@ -2765,6 +2801,21 @@ def _run_voice_analysis():
 
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
+async def _stay_disconnected():
+    """Mic and camera are both off in the Ember app, so Ember sends Gemini nothing and
+    Gemini closes the session after ~2 min. Rather than reconnect every 2 min, wait until
+    one is back on, or until a reminder or family message is due (that session idles
+    out again afterwards). The next connection resumes or recaps the conversation."""
+    print("[SESSION] Microphone and camera are off: staying disconnected from Gemini until one is "
+          "turned back on or a reminder or message is due.", flush=True)
+    monitor.emit("paused", "Microphone and camera are off in the Ember app")
+    _boot_status("ready", "Ember is ready. Microphone and camera are off in the Ember app.", ready=True)
+    while not _shutdown_event.is_set() and device_settings.nothing_to_send():
+        if await asyncio.to_thread(public_toolkit.has_something_to_say):
+            break
+        await asyncio.sleep(2)
+
+
 async def run():
     global _last_robot_speech_ts, _stop_started_ts, _go_away_at, _connected_at, _startup_files_noted
     monitor.start(lambda: {"playback_bytes": len(_playback_buffer), "gemini_generating_audio": _gemini_speaking, "audio_input": dict(_audio_enhancer.metrics) if _audio_enhancer is not None else None})
@@ -2777,6 +2828,8 @@ async def run():
         started, set_up = time.monotonic(), False
         model = _live_models.current
         try:
+            if device_settings.nothing_to_send() and not await asyncio.to_thread(public_toolkit.has_something_to_say):
+                await _stay_disconnected()
             monitor.finish_transcripts()
             monitor.emit("connecting", "Connecting to Gemini Live")
             print(f"Connecting to {model}...")
@@ -2787,10 +2840,18 @@ async def run():
             ) as live_session:
                 set_up = True
                 live_session = _address_gate.watch(live_session)  # notes Ember's own messages
+                conversation_session.connected()
                 print("Connected. System ready.")
                 if not _startup_files_noted:  # once a run: what to read into memory early next boot
                     _startup_files_noted = True
                     threading.Thread(target=pc_hardware.note_startup_files, args=("ember",), daemon=True).start()
+                if not conversation_session.resuming():
+                    recap = conversation_session.recap()
+                    if recap:
+                        # Fresh start (resume impossible): Ember still knows what was just said.
+                        await live_session.send_client_content(
+                            turns={"role": "user", "parts": [{"text": recap}]}, turn_complete=False)
+                        print(f"[SESSION] Fresh connection: recapped {recap.count(chr(10))} recent turns.", flush=True)
                 monitor.emit("listening", "Connected to Gemini; listening")
                 _boot_status("ready", "Baymax is ready.", ready=True)
                 print("=" * 70)
@@ -2845,6 +2906,7 @@ async def run():
                         _shutdown_event.set()
                         raise
                 finally:
+                    conversation_session.ended()
                     _abandon_reply()
                     _abort_connection(live_session)
                     output_stream.stop()
@@ -2861,9 +2923,14 @@ async def run():
             pause, quick_failures = _reconnect_plan(e, time.monotonic() - started, quick_failures)
             if pause is not None:
                 # Gemini's routine reset or a lost connection: the audio devices are fine.
-                if pause:
+                if device_settings.nothing_to_send():
+                    # Nothing was being sent, so Gemini closed the idle session (about every
+                    # 2 min); the loop above then stays disconnected instead of reconnecting.
+                    print("[SESSION] Gemini closed the idle session (microphone and camera are off).", flush=True)
+                elif pause:
                     print(f"[SESSION] Connection to Gemini lost ({reason}); reconnecting in {pause:.1f} s.",
                           flush=True)
+                if pause:
                     await asyncio.sleep(pause)
                 continue
             print(f"connection failed {reason}. retrying...")
@@ -2878,20 +2945,25 @@ def _boot_status(stage: str, message: str, ready: bool = False, error: bool = Fa
 
 if __name__ == "__main__":
     _boot_status("audio", "Configuring audio devices...")
+    device_settings.start()  # saved speaker volume; camera / microphone switched off in the app stay off
 
     # Camera and pose first: the pose process loads (5+ s on a cold Orange Pi 4 Pro boot)
     # while the memory embedder loads below, so the first camera frame, and the startup
     # greeting that waits for it, come seconds sooner. Neither needs the other.
     # ── Download pose model if needed ──
-    _boot_status("pose_model", "Loading pose model...")
-    try:
-        _ensure_pose_model()
-    except Exception as e:
-        _boot_status("pose_model", f"Pose model error: {e}", error=True)
-        print(f"[BOOT] Pose model load failed: {e}")
+    if not device_settings.camera_on():
+        _boot_status("pose_model", "Camera off in the Ember app: fall detection off")
+    else:
+        _boot_status("pose_model", "Loading pose model...")
+        try:
+            _ensure_pose_model()
+        except Exception as e:
+            _boot_status("pose_model", f"Pose model error: {e}", error=True)
+            print(f"[BOOT] Pose model load failed: {e}")
 
     # ── Start fall detection in a dedicated thread ──
-    _boot_status("camera", "Starting camera & pose tracking...")
+    _boot_status("camera", "Starting camera & pose tracking..." if device_settings.camera_on()
+                 else "Camera off in the Ember app")
     _fall_thread = threading.Thread(target=_fall_detection_thread, daemon=True)
     _fall_thread.start()
     print(f"[CAM] Camera/pose thread started (fall detection {'active' if FALL_DETECTION_ENABLED else 'OFF (device.toml)'}).")

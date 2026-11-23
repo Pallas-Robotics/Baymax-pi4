@@ -123,6 +123,47 @@ class V10RuntimeTests(unittest.TestCase):
         append(second, new_turn=True)
         self.assertEqual(namespace['_playback_buffer'], second)
 
+    def test_initiates_once_and_waits_for_a_reply_before_trying_again(self):
+        clock = SimpleNamespace(now=1000.0)
+        fired = []
+        ns = {}
+
+        async def sleep(seconds):
+            clock.now += seconds
+            ns["_face_last_seen_ts"] = clock.now  # someone is in view the whole time
+            if clock.now >= ns["stop_at"]:
+                raise asyncio.CancelledError()
+
+        async def fire(session):
+            fired.append(clock.now)
+
+        ns.update({
+            "asyncio": SimpleNamespace(sleep=sleep), "time": SimpleNamespace(monotonic=lambda: clock.now),
+            "random": SimpleNamespace(random=lambda: 0.0), "_shutdown_event": threading.Event(),
+            "_initiation_ts_lock": threading.Lock(), "_face_state_lock": threading.Lock(),
+            "_last_robot_speech_ts": clock.now, "_last_user_speech_ts": 0.0, "_last_initiation_ts": 0.0,
+            "_face_last_seen_ts": clock.now, "_safe_to_initiate": lambda now: True, "_fire_initiation": fire,
+            "RESET_IDLE_ON_USER_SPEECH": True, "IDLE_THRESHOLD_SECONDS": 60.0, "FACE_FRESH_SECONDS": 1.0,
+            "FACE_ABSENCE_RESET_SECONDS": 10.0, "INITIATION_TICK_SECONDS": 5.0, "_HAZARD_TABLE": [1.0],
+        })
+        with patch("test_public_core_integration.CORE", V10):
+            monitor = load_function("initiation_monitor", ns)
+
+        def run_for(seconds):
+            ns["stop_at"] = clock.now + seconds
+            with self.assertRaises(asyncio.CancelledError):
+                asyncio.run(monitor(None))  # a fresh monitor, as after a Gemini reconnect
+
+        run_for(600)  # ten silent minutes in front of the robot
+        self.assertEqual(len(fired), 1)
+        run_for(600)  # still no answer, even across a reconnect
+        self.assertEqual(len(fired), 1)
+
+        ns["_last_user_speech_ts"] = clock.now  # the person finally says something
+        ns["_last_robot_speech_ts"] = clock.now
+        run_for(600)
+        self.assertEqual(len(fired), 2)
+
     def test_speaker_mixes_extra_sources_such_as_audiobooks(self):
         enhancer = SimpleNamespace(full_duplex=True, rendered=Mock(), mix_output=lambda chunk: b"\x07\x00" * (len(chunk) // 2))
         namespace = {"_playback_buffer": b"", "_playback_lock": threading.Lock(), "_playback_taken": 0,
@@ -573,6 +614,7 @@ class ReconnectTests(unittest.TestCase):
             "fall_worker": SimpleNamespace(alert_monitor=forever), "_shutdown_event": None,
             "connection_lost": connection_lost, "not_tried": not_tried, "RECONNECT_DELAY_S": 0.3, "QUICK_SESSION_S": 60.0,
             "RECONNECT_MAX_DELAY_S": 4.8, "_go_away_at": None, "_connected_at": 0.0, "_startup_files_noted": True,
+            "device_settings": SimpleNamespace(nothing_to_send=lambda: False, mic_on=lambda: True, camera_on=lambda: True), "conversation_session": SimpleNamespace(connected=lambda: None, ended=lambda: None, resuming=lambda: True, recap=lambda: None, note_turn=lambda *a: None),
             "live_models": live_models,
         }
         namespace.update(overrides)
@@ -724,6 +766,39 @@ class ReconnectTests(unittest.TestCase):
         ns["time"].sleep.assert_not_called()
         ns["sd"]._terminate.assert_not_called()
         ns["sd"]._initialize.assert_not_called()
+
+    def test_mic_and_camera_off_stays_disconnected_and_recaps_a_fresh_start(self):
+        """Ember app: mic and camera both off. Gemini closes the idle session; Ember then
+        waits disconnected instead of reconnecting every 2 minutes, and a connection that
+        cannot resume gets the recent turns back."""
+        off = {"now": False}
+        waited, notes = [], []
+
+        async def stay():
+            waited.append(True)
+            off["now"] = False                         # someone turns the camera back on
+
+        async def receive(index, session, namespace):
+            if index == 0:
+                off["now"] = True                      # switched off during the first connection
+                raise errors.APIError(1011, {"message": "idle"})
+            notes.extend(session.sent)
+            raise errors.APIError(1011, {"message": "internal error"})   # an ordinary loss ends the test
+        settings = SimpleNamespace(nothing_to_send=lambda: off["now"], mic_on=lambda: True, camera_on=lambda: True)
+        session = SimpleNamespace(connected=lambda: None, ended=lambda: None, note_turn=lambda *a: None,
+                                  resuming=lambda: False, recap=lambda: "[EARLIER IN THIS CONVERSATION] ...\nThem: hi")
+        toolkit = Mock(has_something_to_say=Mock(return_value=False))
+        printed = Mock()                               # run()'s own prints (the harness hides builtins.print)
+        self.run_connections(2, receive, device_settings=settings, conversation_session=session,
+                             public_toolkit=toolkit, _stay_disconnected=stay, print=printed)
+        logged = " ".join(str(c.args[0]) for c in printed.call_args_list if c.args)
+        self.assertEqual(waited, [True])               # once, before the second connection
+        self.assertEqual(logged.count("Gemini closed the idle session (microphone and camera are off)."), 1)
+        self.assertEqual(logged.count("Connection to Gemini lost"), 1)     # only the second, ordinary loss
+        self.assertEqual(self.pauses[0], 0.3)          # the usual pause still guards a failing network
+        self.assertIn("recapped 1 recent turns", logged)
+        self.assertEqual(notes[0]["turns"]["parts"][0]["text"].split("\n")[1], "Them: hi")
+        self.assertFalse(notes[0]["turn_complete"])    # a note, not a turn to answer
 
     def test_a_device_error_still_resets_audio_but_never_blocks_the_event_loop(self):
         class PortAudioError(Exception):
@@ -1114,6 +1189,7 @@ class RealTimeThreadTests(unittest.TestCase):
             def __exit__(self, *args):
                 pass
         ns = {"asyncio": asyncio, "np": np, "queue": queue, "time": time, "_audio_enhancer": None,
+              "device_settings": SimpleNamespace(mic_on=lambda: True, camera_on=lambda: True), 
               "_waiting_cue": None, "INPUT_CHANNELS": 1, "_audio_record_queue": queue.Queue(),
               "_people": SimpleNamespace(feed_audio=lambda *a: None), "_mic_alignment": SimpleNamespace(fix=lambda block: block, flips=0, shifted=False), "_mic_alignment_shown": 0, "_gemini_speaking": False,
               "audio_queue_mic": asyncio.Queue(), "INTERRUPT_RMS_THRESHOLD": 1000,
@@ -1165,6 +1241,7 @@ class RealTimeThreadTests(unittest.TestCase):
             def __exit__(self, *args):
                 pass
         ns = {"asyncio": asyncio, "np": np, "queue": queue, "time": time, "_audio_enhancer": None,
+              "device_settings": SimpleNamespace(mic_on=lambda: True, camera_on=lambda: True), 
               "_waiting_cue": None, "INPUT_CHANNELS": 1, "_audio_record_queue": queue.Queue(),
               "_people": SimpleNamespace(feed_audio=lambda *a: None), "_mic_alignment": SimpleNamespace(fix=lambda block: block, flips=0, shifted=False), "_mic_alignment_shown": 0, "_gemini_speaking": False,
               "audio_queue_mic": asyncio.Queue(), "INTERRUPT_RMS_THRESHOLD": 1000,
@@ -1242,7 +1319,8 @@ class RealTimeThreadTests(unittest.TestCase):
         greeter = SimpleNamespace(video_sent=threading.Event())
         ns = {"asyncio": asyncio, "time": time, "cv2": FakeCv2, "_latest_frame_lock": threading.Lock(),
               "_latest_frame": "frame", "types": SimpleNamespace(Blob=lambda **kw: SimpleNamespace(**kw)),
-              "tracker_send_video": SimpleNamespace(record=Mock()), "_proactive": greeter}
+              "tracker_send_video": SimpleNamespace(record=Mock()), "_proactive": greeter,
+              "device_settings": SimpleNamespace(mic_on=lambda: True, camera_on=lambda: True)}
         with patch("test_public_core_integration.CORE", V10):
             for name in ("_encode_video_frame", "send_video_realtime"):
                 load_function(name, ns)
@@ -1266,6 +1344,7 @@ class RealTimeThreadTests(unittest.TestCase):
         ns = {"asyncio": asyncio, "time": time, "_latest_frame_lock": threading.Lock(), "_latest_frame": None,
               "types": SimpleNamespace(Blob=lambda **kw: SimpleNamespace(**kw)),
               "tracker_send_video": SimpleNamespace(record=Mock()), "_proactive": greeter,
+              "device_settings": SimpleNamespace(mic_on=lambda: True, camera_on=lambda: True),
               "_encode_video_frame": lambda frame: b"jpeg"}
 
         async def wait(seconds):
@@ -1535,7 +1614,8 @@ class PoseProcessRestartTests(unittest.TestCase):
             "_notify_webapp": Mock(),
         })
         ns.update(names)
-        thread = load_function("_fall_detection_thread", ns)
+        ns["device_settings"] = SimpleNamespace(mic_on=lambda: True, camera_on=lambda: True)
+        thread = load_function("_camera_session", ns)      # one camera run of _fall_detection_thread
         with patch.dict(os.environ, {"BAYMAX_HARDWARE_PROFILE": "test"}), patch("builtins.print") as printed:
             thread()
         logged = " ".join(str(c.args[0]) for c in printed.call_args_list if c.args)

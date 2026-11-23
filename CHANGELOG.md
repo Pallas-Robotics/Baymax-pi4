@@ -1,5 +1,116 @@
 # MVP (unreleased)
 
+- From the LattePanda line (JoeKojima/Baymax `mvp-v10`, James), now on the Orange Pi 4 Pro:
+  microphone, camera and speaker volume from the Ember app; daily conversation reports for
+  the family with a preview on request; staying disconnected while mic and camera are both
+  off, with a recap after a fresh start; and opening a conversation only once until the
+  person replies. Each has its own entry below. Adapted to this line: the camera switch
+  closes the pose process (and so face recognition), the video sender keeps its cold-boot
+  wait and first-frame-at-once, and the idle close goes through the reconnect loop without
+  an audio reset.
+- With the microphone and camera both off in the Ember app, Ember now stays
+  disconnected from Gemini instead of reconnecting every two minutes. Ember sends
+  Gemini nothing then, so Gemini closed the idle session about every two minutes
+  (Ember 1's log on 2026-11-13). It reconnects when either one is turned back on,
+  or briefly when a reminder or a family message is due. The eyes show ready, not
+  loading, while it waits.
+- Ember keeps the conversation across those reconnects
+  (`features/conversational_ability/session.py`):
+  - A resume handle whose connection ran normally stays usable. Before, the second
+    idle close in a row started a fresh conversation, because Gemini sends no new
+    handle while nobody speaks.
+  - When a connection has to start fresh anyway, Ember gives Gemini the last two
+    hours of this run's conversation (at most 40 turns and 4,000 characters) as a
+    note, so it still remembers what was just said. Gemini had already heard that
+    text, so nothing new leaves the robot. A service restart still starts with
+    only the long-term memories.
+- Ember opens a conversation on its own only once (`initiation_monitor` in
+  `realtime_gemini_10.py`). If nobody answers the opener, it stays quiet until the
+  person speaks, instead of trying again every idle minute or two (the robot's log
+  showed three openers in under four minutes on 2026-11-11). The startup hello is
+  separate and unchanged.
+- Daily conversation reports for the family (`features/toolkits/family/reports.py`,
+  the Company-Website Reports tab). User decisions, 2026-11-11:
+  - Each evening at `report_time` (default 20:00, Ember's local time) Ember writes
+    a summary of the conversations since the last report with Gemini 3.5 Flash.
+    It covers topics, mood and cautious concern flags (health, mood, memory,
+    safety, and the family's "watch for" list), each flag with up to two short
+    quotes. A quote must appear in the transcript or it is dropped. At most four
+    flags.
+  - Once a conversation has been quiet for 3 minutes, a strict check catches the
+    few urgent things: self-harm, chest pain or breathing, a fall or injury, or a
+    scam in progress. The site emails those right away.
+  - Settings `reports` and `report_flags` (`device_settings.py`) let the family
+    turn off flags only, or everything, from the app. The person can't turn them
+    off at the robot. With reports off, nothing is journalled.
+  - Ember tells the person once, and the `[DAILY REPORTS]` instruction lets it
+    answer honestly.
+  - Raw lines stay in the robot-only journal `toolkit_reports.sqlite3` (14 days).
+    Only reports and alerts go out, through the app link, and they count as sent
+    only once the site acknowledges them. Reports missed while Ember was off are
+    caught up, up to 3 days back.
+  - "Write a report now" in the app (to try it out) asks, through the inbox, for a
+    preview of the conversations since the last report. Ember writes it within
+    seconds while online; the evening report is unchanged.
+
+- Eyes: per-robot mounting from `.env`. `BAYMAX_EYES_ROTATE180=1` is for matrices
+  mounted upside down and `BAYMAX_EYES_SWAP=1` for left and right swapped; both
+  are off by default. This was a hand edit on unit 001 (Nov 1), which needs both,
+  and is now committed so that unit can follow `mvp-v10`.
+
+- Microphone, camera and speaker volume from the Ember app (dashboard Settings tab,
+  Company-Website `device-settings`), carried by the app link's inbox and sync:
+  - `features/device_settings.py` holds them, saved in `device_settings.json`
+    (or under `BAYMAX_DATA_DIR`), so a camera or microphone switched off stays off
+    across restarts. Only the dashboard can change them.
+  - Microphone off: v10's capture callback drops each block first, so nothing
+    reaches Gemini, the recorder, voice analysis or the wake words. Ember still
+    passes on messages and reminders.
+  - Camera off: the camera thread releases the camera and stops the pose model
+    and the fall worker. There is no fall detection, no MJPEG stream and no video
+    to Gemini. Switched on again, it starts over. A boot with the camera off skips
+    the pose model and says so in the boot status.
+  - Volume: the whole speaker through PipeWire (`pactl`, else `wpctl`), 10-100 %,
+    put back at boot. The sync reports whether it worked.
+  - When the camera or microphone changes, Ember says who did it, and each new
+    session tells Gemini what is off.
+
+- Svanik's test harness (#28 live eval, #31 robot rig) adapted to v10 for mvp-v10:
+  - Both read the core that `run_pc.py` starts (`realtime_gemini_10.py` here, v8
+    elsewhere). The config reader now follows v10's prompt, which is built from
+    `features/persona.py` plus the `[MEMORY CONTEXT]` / `[WHEN TO SPEAK]` sections
+    that `device.toml` switches on. Before this change it failed with
+    `NameError: persona`, and every feature scenario was skipped.
+  - v10's address gate is part of what gets tested. Layer 1 runs the branch's own
+    `AddressGate` over each session, and Layer 2 reads its `[ADDRESS] ... dropped
+    reply` log line, so checks judge what the robot plays, and a dropped answer is
+    reported as dropped. Scenario lines now name Ember. New scenarios: `overheard`
+    and `follow-up` (Layer 1), `overheard-conversation` (robot). New expectation in
+    both layers: `silent`.
+  - Rig privacy for v10: each run gets its own `BAYMAX_DATA_DIR`
+    (`.ember-rig-data-*` in the checkout, deleted afterwards), covering recordings,
+    transcripts, ChromaDB memories, reminders, family messages and the cloud
+    queue. `BAYMAX_DEVICE_KEY` is blanked (no cloud uplink or Ember app link), and
+    dashboard posts go to a closed port (no fall-alert emails from synthetic runs).
+    Device keys and email settings are never copied from the robot's `.env`, and
+    the probe never prints a `*KEY*` setting.
+  - `prepare_checkout.sh` can reuse a LattePanda unit's venv (`EMBER_RIG_VENV`).
+  - Fixes to the rig from review:
+    - `prepare_checkout.sh` no longer stops with "UV: unbound variable" when a v10
+      checkout has no `bootstrap.py`. The v10 native packages install with uv, or
+      with pip if the robot has no uv, using `CC=gcc CXX=g++` as ember-update does.
+    - Calibration plays at the config's `gain_db`, so the edit-and-recalibrate loop
+      now converges. A config gain that differs from the calibrated one stops the
+      run as out of calibration.
+    - A log character split across two reads (Hindi) is no longer corrupted.
+    - When the suite time limit hits mid-scenario, that scenario is an error that
+      keeps its finished steps and failures, so a cut-off run can no longer PASS.
+    - A job cancel during setup or cleanup no longer escapes with a traceback.
+      After the first SIGINT/SIGTERM, cleanup and the report always finish.
+  - Offline: `test_live_eval.py` 22 tests, `test_robot_rig.py` 58 tests. Not yet run
+    live against Gemini or on a robot.
+- Offline checks run only on the Orange Pi (Linux ARM64) for now; the Linux, Windows and
+  macOS desktop runs are off until local development is a priority again.
 - Desktop offline checks: the people store locks with msvcrt on Windows (fcntl doesn't exist
   there, so every test importing the runtime failed); Linux runners start a PulseAudio server
   so `import sounddevice` works; tests of Linux-only behaviour (/proc startup files, replacing

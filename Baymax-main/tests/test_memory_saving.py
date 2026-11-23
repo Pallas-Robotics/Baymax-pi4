@@ -495,6 +495,7 @@ class TeardownTests(unittest.TestCase):
         client = SimpleNamespace(aio=SimpleNamespace(live=SimpleNamespace(connect=lambda **kw: Connect())))
         ns = {"asyncio": asyncio, "time": time, "monitor": Mock(), "public_toolkit": SimpleNamespace(prewarm=Mock()),
               "_startup_files_noted": True,
+              "device_settings": SimpleNamespace(nothing_to_send=lambda: False, mic_on=lambda: True, camera_on=lambda: True), "conversation_session": SimpleNamespace(connected=lambda: None, ended=lambda: None, resuming=lambda: True, recap=lambda: None, note_turn=lambda *a: None),
               "genai": SimpleNamespace(Client=lambda **kw: client), "API_KEY": "k",
               "_live_models": live_models.ModelChoice(["m"]),  # run()'s Gemini Live model
               "_build_config": dict, "_boot_status": Mock(), "_address_gate": SimpleNamespace(watch=lambda s: s),

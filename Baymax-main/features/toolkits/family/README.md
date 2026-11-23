@@ -28,3 +28,40 @@ quietness is checked again after loading the profile, and failed/cancelled or
 deferred deliveries stay pending. An edit arriving during a send remains pending
 for the next poll. This is a local best-effort quiet check, not an atomic
 guarantee about remote generation. No additional data or provider is introduced.
+
+## Settings from the app: microphone, camera, speaker volume
+
+Ported from the LattePanda line (JoeKojima/Baymax `mvp-v10`, James). The app's Settings
+tab is the only place these change; they arrive in the inbox and what is in force goes
+back in every sync (`features/device_settings.py`, saved in `device_settings.json` under
+`BAYMAX_DATA_DIR`, so a switch stays as set across restarts).
+
+| Setting | On the robot |
+|---|---|
+| Microphone off | The capture callback drops every block first: nothing reaches Gemini, the recorder, voice recognition or the wake words. Ember can still speak. |
+| Camera off | The camera thread releases the camera and closes the pose process: no fall detection, no MJPEG stream, no video to Gemini, no face recognition. On again, it starts over. |
+| Volume, 10-100% | The whole speaker, through PipeWire (`wpctl` or `pactl`). Never silent: alerts must be heard. |
+
+Ember says out loud who switched the camera or microphone off or on. With **both** off
+Ember sends Gemini nothing, so Gemini closes the idle session about every 2 minutes.
+Ember then stays disconnected until one is back on, or a reminder or family message is
+due. A connection that can't resume gets the last two hours of this run's turns back
+as a note (`session.recap`, RAM only). Tests: `tests/test_device_settings.py`,
+`tests/test_session.py`, `tests/test_v10_runtime.py` (the camera thread, the mic
+callback, and `run()` staying disconnected).
+
+## Daily reports for the family
+
+`reports.py`, ported with the settings above. Each evening at `report_time` (app
+setting, default 20:00 robot time) Ember writes a short summary of the day's
+conversations with Gemini Flash, with cautious concern flags (a clear or repeated sign,
+never a passing remark; up to two quotes that must appear in the transcript). A strict
+check after each conversation catches urgent things (self-harm, chest pain, a fall, a
+scam in progress). "Write a report now" in the app asks for a preview.
+
+- Data: raw transcript lines stay in a robot-only journal (`toolkit_reports.sqlite3`,
+  pruned after 14 days). Only the reports and alerts go to the site, through this link.
+  The transcript goes to Gemini Flash for the summary, as it already does for memory.
+- Off: `reports` or `report_flags` in the app, not at the robot. With reports off
+  nothing is journalled. Ember tells the person about the reports once.
+- Tests: `tests/test_family_reports.py`.

@@ -122,7 +122,7 @@ def extend_config(config):
     if everyday.enabled():
         result["system_instruction"] += everyday.INSTRUCTION
     if family.enabled():
-        result["system_instruction"] += family.INSTRUCTION
+        result["system_instruction"] += family.INSTRUCTION + family.report_section()
     if look_closely.enabled():
         result["system_instruction"] += look_closely.INSTRUCTION
     if listen.enabled():
@@ -143,6 +143,19 @@ def extend_config(config):
     if search_enabled() and SEARCH_INSTRUCTION not in result["system_instruction"]:
         result["system_instruction"] += SEARCH_INSTRUCTION
     return experimental.extend_config(result)
+
+
+def has_something_to_say():
+    """While the mic and camera are off Ember stays disconnected; a due reminder or a
+    new family message is worth reconnecting for (the session then idles out again)."""
+    if not enabled():
+        return False
+    try:
+        if everyday.enabled() and everyday.store.has_due():
+            return True
+        return family.enabled() and bool(family.store.unread(limit=1))
+    except Exception:
+        return False
 
 
 def execute(name, args):
