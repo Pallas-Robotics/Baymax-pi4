@@ -1,5 +1,51 @@
 # MVP (unreleased)
 
+- Robot test rig: synthesized audio and video, measured from outside the robot.
+  - **Timeline scenarios** (`evals/robot/timeline.py`): cues on one rig clock,
+    fixed-time audio mixed to the sample, barge-in "N ms after Ember starts
+    talking", light, fault and power cues, a seeded SHA-256 of what was played,
+    and a cue log with lateness.
+  - **Video on the HTTP display**: MP4/WebM fullscreen, which confirms when
+    playback began.
+  - **Screen check**: Ember must read a seeded code card, or the run is a rig
+    fault.
+  - **Checksummed fixtures** kept outside Git.
+  - **Reference microphone** (`measure.py`): latency from the end of the line to
+    Ember's first sound, about 10 ms; recordings are deleted and only numbers are
+    reported.
+  - **Repeats**: `--repeat N` in seeded random order, with Wilson 95% pass rates,
+    release gates (`--release`, e.g. safety 19/20) and product / flaky / rig fault
+    classes (`stats.py`).
+  - **Virtual-device mode** (`--virtual`; snd-aloop and v4l2loopback; loaded only
+    when configured).
+  - **New scenarios**: fall clip and control, timed barge-in, noisy room, network
+    drop, dim light, boot to ready (external smart plug only).
+  - **Shorter rig latencies**: the line's end is now the end of the audio, not
+    when the rig stopped waiting (about 0.5 s earlier).
+  - **README**: shopping list with prices, setup, the limits of screens, and what
+    each layer can and can't prove.
+  - Offline tests in `tests/test_robot_rig_av.py`; nothing has run on hardware.
+
+- Robot test rig (Layer 2), ported from JoeKojima/Baymax#31 to this repository and
+  the v10 runtime: `Baymax-main/evals/robot/` runs a PR's real runtime (`run_mvp.py`
+  → `run_pc.py` → `realtime_gemini_10.py`) on a dedicated test robot with its real
+  microphone, echo cancellation, speaker and camera. A second USB speaker plays a
+  synthetic "person" and noise at calibrated levels, a tablet shows synthetic cards,
+  and the rig checks `.runtime-status.json`, the log and CPU/memory against
+  `evals/robot/scenarios.json` (latency, barge-in, echo, disengage/TV/engage,
+  reminders, look closely, stop over radio and audiobooks, eyes, CPU, restarts).
+  Changes for this repository: reply latency uses v10's `conversation_timing`
+  playback times when present; CPU/memory/temperature/NPU come from
+  `devops/performance/check.py`'s sampler on Linux; the runtime gets a private
+  `BAYMAX_DATA_DIR` per run (recordings, transcripts and its memory store are
+  deleted afterwards; the robot's memories are untouched); the agent harness trace
+  (`EMBER_TRACE`, schema version 1 from #10) is read when the runtime writes one, for
+  exact state times and reply-audio arrival, with the status/log parsing as the
+  fallback.
+  `.github/workflows/robot-test.yml` runs it on a self-hosted runner when a
+  collaborator labels a same-repository PR `robot-test` or submits a branch. Not
+  yet run on hardware; the test robot and runner are not set up.
+
 - LED eyes blink calmly: a blink chance every 2.5-5 s (was 0.7-1.4 s) and eyes shut for
   0.12 s (was 0.015 s, which read as a flicker). Seen on ember-002.
 - LED eyes are one step dimmer: brightness 2 of 15 (was 3); sleep eyes stay at 1.
